@@ -175,7 +175,7 @@ function calcTargetProgress(goal) {
   const current = goal.currentValue || 0;
   const target = goal.targetValue;
   const start = goal.startValue || (goal.targetDirection === "decrease" ? current : 0);
-  if (!target) return { pct: 0, isComplete: false };
+  if (!target && target !== 0) return { pct: 0, isComplete: false };
   if (goal.targetDirection === "decrease") {
     // e.g. weight: start=85, target=60, current=72 → progress = (85-72)/(85-60) = 52%
     const totalDelta = start - target;
@@ -185,6 +185,7 @@ function calcTargetProgress(goal) {
     return { pct, isComplete: pct >= 100 };
   } else {
     // increase (default): e.g. portfolio: start=0, target=100, current=40 → 40%
+    if (target === 0) return { pct: current === 0 ? 100 : 0, isComplete: current === 0 };
     const pct = Math.min(100, Math.max(0, Math.round((current / target) * 100)));
     return { pct, isComplete: pct >= 100 };
   }
@@ -281,7 +282,19 @@ function saveRecurringRules(rules) {
 function loadRecurLog() {
   try {
     const saved = localStorage.getItem(RECUR_LOG_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const log = JSON.parse(saved);
+      // Prune entries older than 7 days to prevent localStorage bloat
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 7);
+      const cutoffStr = cutoff.toISOString().split("T")[0];
+      const pruned = {};
+      Object.keys(log).forEach(key => {
+        const datepart = key.split("_").pop();
+        if (datepart >= cutoffStr) pruned[key] = true;
+      });
+      return pruned;
+    }
   } catch (e) {}
   return {};
 }
@@ -398,7 +411,7 @@ function RecurringModal({ show, onClose, rules, onSave }) {
   };
 
   const toggleEnabled = (id) => { const updated = localRules.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r); setLocalRules(updated); onSave(updated); };
-  const deleteRule = (id) => { const updated = localRules.filter(r => r.id !== id); setLocalRules(updated); onSave(updated); };
+  const deleteRule = (id) => { const rule = localRules.find(r => r.id === id); if (rule && !confirm(`Delete recurring task "${rule.text}"?`)) return; const updated = localRules.filter(r => r.id !== id); setLocalRules(updated); onSave(updated); };
 
   const describeSchedule = (rule) => {
     if (rule.type === "daily") return "Every day";
@@ -471,6 +484,7 @@ function RecurringModal({ show, onClose, rules, onSave }) {
               <div style={{ marginBottom: 10 }}>
                 <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Pick date(s) of the month</label>
                 <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{Array.from({ length: 31 }, (_, i) => i + 1).map(d => (<button key={d} className={`day-chip monthly ${newMonthDays.includes(d) ? "active" : ""}`} onClick={() => toggleMonthDay(d)}>{d}</button>))}</div>
+                {newMonthDays.some(d => d > 28) && <p style={{ fontSize: 10, color: "#f59e0b", marginTop: 6, marginBottom: 0 }}>⚠️ Days 29-31 won't trigger in shorter months</p>}
               </div>
             )}
             <div style={{ marginBottom: 12 }}>
@@ -491,7 +505,7 @@ function RecurringModal({ show, onClose, rules, onSave }) {
 }
 
 function CategoryBadge({ category }) {
-  const cat = CATEGORIES.find(c => c.value === category) || CATEGORIES[3];
+  const cat = CATEGORIES.find(c => c.value === category) || CATEGORIES[CATEGORIES.length - 1];
   return (<span style={{ background: cat.bg, color: cat.color, border: `1px solid ${cat.color}30`, fontSize: 11, padding: "1px 6px", borderRadius: 10, fontWeight: 500, whiteSpace: "nowrap" }}>{cat.icon} {cat.label}</span>);
 }
 
@@ -567,6 +581,7 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
   const [recurCategory, setRecurCategory] = useState("work");
   const [recurPriority, setRecurPriority] = useState("medium");
   const [showTargetEditor, setShowTargetEditor] = useState(false);
+  const [targetDir, setTargetDir] = useState(goal.targetDirection || "increase");
 
   const lv = GOAL_LEVELS[levelIdx];
   const nextLevel = levelIdx < GOAL_LEVELS.length - 1 ? GOAL_LEVELS[levelIdx + 1] : null;
@@ -655,8 +670,8 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
                 <div style={{ marginBottom: 8 }}>
                   <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Direction</label>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button id={`td_inc_${goal.id}`} onClick={() => { document.getElementById(`td_inc_${goal.id}`).classList.add("active"); document.getElementById(`td_dec_${goal.id}`).classList.remove("active"); }} className={`pri-btn ${(!goal.targetDirection || goal.targetDirection === "increase") ? "active" : ""}`} style={{ background: (!goal.targetDirection || goal.targetDirection === "increase") ? "#059669" : "#ecfdf5", color: (!goal.targetDirection || goal.targetDirection === "increase") ? "white" : "#059669", border: "1.5px solid #059669", padding: "4px 12px", fontSize: 11 }}>▲ Increase</button>
-                    <button id={`td_dec_${goal.id}`} onClick={() => { document.getElementById(`td_dec_${goal.id}`).classList.add("active"); document.getElementById(`td_inc_${goal.id}`).classList.remove("active"); }} className={`pri-btn ${goal.targetDirection === "decrease" ? "active" : ""}`} style={{ background: goal.targetDirection === "decrease" ? "#dc2626" : "#fef2f2", color: goal.targetDirection === "decrease" ? "white" : "#dc2626", border: "1.5px solid #dc2626", padding: "4px 12px", fontSize: 11 }}>▼ Decrease</button>
+                    <button onClick={() => setTargetDir("increase")} className={`pri-btn ${targetDir === "increase" ? "active" : ""}`} style={{ background: targetDir === "increase" ? "#059669" : "#ecfdf5", color: targetDir === "increase" ? "white" : "#059669", border: "1.5px solid #059669", padding: "4px 12px", fontSize: 11 }}>▲ Increase</button>
+                    <button onClick={() => setTargetDir("decrease")} className={`pri-btn ${targetDir === "decrease" ? "active" : ""}`} style={{ background: targetDir === "decrease" ? "#dc2626" : "#fef2f2", color: targetDir === "decrease" ? "white" : "#dc2626", border: "1.5px solid #dc2626", padding: "4px 12px", fontSize: 11 }}>▼ Decrease</button>
                   </div>
                   <p style={{ fontSize: 10, color: "#9ca3af", margin: "4px 0 0" }}>Increase = grow towards target (e.g. savings). Decrease = reduce to target (e.g. weight).</p>
                 </div>
@@ -690,10 +705,8 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
                     const current = Number(document.getElementById(`cv_${goal.id}`).value);
                     const start = Number(document.getElementById(`sv_${goal.id}`).value);
                     const unit = document.getElementById(`tu_${goal.id}`).value.trim();
-                    const isDecBtn = document.getElementById(`td_dec_${goal.id}`).classList.contains("active");
-                    const direction = isDecBtn ? "decrease" : "increase";
                     if (label && target) {
-                      onUpdateGoal(goal.id, { targetLabel: label, targetValue: target, currentValue: current || 0, startValue: start || current || 0, targetUnit: unit, targetDirection: direction });
+                      onUpdateGoal(goal.id, { targetLabel: label, targetValue: target, currentValue: current || 0, startValue: start || current || 0, targetUnit: unit, targetDirection: targetDir });
                       setShowTargetEditor(false);
                     }
                   }} style={{ background: "#d97706", color: "white", border: "none", padding: "5px 12px", borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>Save Target</button>
@@ -878,6 +891,10 @@ function GoalsPanel({ goals, onUpdate, onCreateRecurring }) {
     };
     toDelete.add(id);
     collect(id);
+    const goal = allGoals.find(g => g.id === id);
+    const childCount = toDelete.size - 1;
+    const msg = childCount > 0 ? `Delete "${goal?.text}" and ${childCount} sub-goal${childCount > 1 ? "s" : ""}?` : `Delete "${goal?.text}"?`;
+    if (!confirm(msg)) return;
     onUpdate({ items: allGoals.filter(g => !toDelete.has(g.id)) });
   };
 
@@ -993,8 +1010,11 @@ function Dashboard({ tasks, goals }) {
   }));
 
   // Streak: consecutive days with at least 1 completion
+  // If nothing completed today, start counting from yesterday (don't break streak mid-day)
   let streak = 0;
-  for (let i = 0; i < 365; i++) {
+  const hasCompletedToday = completedTasks.some(t => t.completedAt === today);
+  const startOffset = hasCompletedToday ? 0 : 1;
+  for (let i = startOffset; i < 365; i++) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split("T")[0];
@@ -1158,9 +1178,17 @@ function Dashboard({ tasks, goals }) {
         </div>
       )}
 
+      {/* Empty state */}
+      {tasks.length === 0 && allGoals.length === 0 && (
+        <div style={{ ...cardStyle, textAlign: "center", padding: "40px 20px", marginBottom: 20 }}>
+          <p style={{ fontSize: 28, marginBottom: 8 }}>📊</p>
+          <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>Start adding tasks and goals to see your progress here!</p>
+        </div>
+      )}
+
       {/* Overdue tasks */}
       {(() => {
-        const overdue = pendingTasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date(today));
+        const overdue = pendingTasks.filter(t => t.dueDate && t.dueDate < today);
         if (overdue.length === 0) return null;
         return (
           <div style={{ ...cardStyle, borderLeft: "4px solid #dc2626" }}>
@@ -1222,7 +1250,7 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
             <span style={{ background: pColors.badge, color: "white", fontSize: 10, padding: "1px 6px", borderRadius: 4 }}>{task.priority}</span>
             <CategoryBadge category={task.category} />
-            {task.dueDate && <span style={{ fontSize: 11, color: new Date(task.dueDate) < Date.now() && !task.completed ? "#dc2626" : "#6b7280", fontWeight: new Date(task.dueDate) < Date.now() && !task.completed ? 600 : 400 }}>Due: {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}</span>}
+            {task.dueDate && (() => { const isOverdue = task.dueDate < new Date().toISOString().split("T")[0] && !task.completed; return <span style={{ fontSize: 11, color: isOverdue ? "#dc2626" : "#6b7280", fontWeight: isOverdue ? 600 : 400 }}>Due: {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}{isOverdue && " (overdue)"}</span>; })()}
             {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", border: "1px solid #c4b5fd40", padding: "1px 5px", borderRadius: 8 }}>🔄 recurring</span>}
             <span style={{ fontSize: 11, color: "#9ca3af" }}>{daysSince(task.createdAt)}d ago</span>
           </div>
@@ -1259,8 +1287,9 @@ function TaskManager() {
   const [activeTab, setActiveTab] = useState("tasks");
   const [goals, setGoals] = useState(loadGoals);
   const inputRef = useRef(null);
-  const spawnedRef = useRef(false);
-  const cloudWriteRef = useRef(false); // prevent echo writes
+
+  const cloudWriteRef = useRef(false); // prevent echo writes for tasks
+  const recurCloudWriteRef = useRef(false); // prevent echo writes for recurring rules
   const goalsCloudWriteRef = useRef(false);
 
   const { syncStatus, saveToCloud, listenToCloud } = useFirebaseSync(user);
@@ -1288,7 +1317,7 @@ function TaskManager() {
     });
     const unsub2 = listenToCloud("recurringRules", (data) => {
       const arr = Array.isArray(data) ? data : Object.values(data || {});
-      cloudWriteRef.current = true;
+      recurCloudWriteRef.current = true;
       setRecurringRules(arr);
       saveRecurringRules(arr);
     });
@@ -1322,13 +1351,11 @@ function TaskManager() {
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  // Spawn recurring tasks on load
+  // Spawn recurring tasks on load and whenever rules change
   useEffect(() => {
-    if (spawnedRef.current) return;
-    spawnedRef.current = true;
     const spawned = spawnRecurringTasks(recurringRules, tasks);
     if (spawned.length > 0) setTasks(prev => [...prev, ...spawned]);
-  }, []);
+  }, [recurringRules]);
 
   const handleSaveRules = (updated) => {
     setRecurringRules(updated);
@@ -1357,12 +1384,23 @@ function TaskManager() {
     if (/^!!\s*/.test(text)) { priority = "high"; cleanText = text.replace(/^!!\s*/, ""); }
     else if (/^!\s*/.test(text)) { priority = "medium"; cleanText = text.replace(/^!\s*/, ""); }
     else if (/^~\s*/.test(text)) { priority = "low"; cleanText = text.replace(/^~\s*/, ""); }
+    if (!cleanText.trim()) return; // prevent empty tasks from shortcut prefixes
     setTasks(prev => [...prev, { id: generateId(), text: cleanText, priority, category: newCategory, dueDate: "", completed: false, createdAt: new Date().toISOString().split("T")[0] }]);
     setInput("");
   };
 
   const toggleTask = (id) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? new Date().toISOString().split("T")[0] : null } : t));
-  const deleteTask = (id) => setTasks(prev => prev.filter(t => t.id !== id));
+  const deleteTask = (id) => {
+    const task = tasks.find(t => t.id === id);
+    if (task && !task.completed && !confirm(`Delete "${task.text}"?`)) return;
+    setTasks(prev => prev.filter(t => t.id !== id));
+  };
+  const clearCompleted = () => {
+    const count = tasks.filter(t => t.completed).length;
+    if (count === 0) return;
+    if (!confirm(`Remove ${count} completed task${count > 1 ? "s" : ""}?`)) return;
+    setTasks(prev => prev.filter(t => !t.completed));
+  };
   const updateTask = (id, updates) => setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
 
   const handleDragStart = useCallback((id) => setDragId(id), []);
@@ -1403,6 +1441,9 @@ function TaskManager() {
 
   const pendingCount = tasks.filter(t => !t.completed).length;
   const completedCount = tasks.filter(t => t.completed).length;
+  const todayDate = new Date().toISOString().split("T")[0];
+  const dueTodayCount = tasks.filter(t => !t.completed && t.dueDate === todayDate).length;
+  const overdueCount = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < todayDate).length;
   const categoryCounts = { all: pendingCount };
   CATEGORIES.forEach(c => { categoryCounts[c.value] = tasks.filter(t => !t.completed && t.category === c.value).length; });
   const sorted = getSortedTasks();
@@ -1416,7 +1457,7 @@ function TaskManager() {
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1f2937", margin: 0 }}>{activeTab === "tasks" ? "My Tasks" : activeTab === "goals" ? "My Goals" : "Dashboard"}</h1>
-          {activeTab === "tasks" && <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>{pendingCount} pending · {completedCount} completed</p>}
+          {activeTab === "tasks" && <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>{pendingCount} pending · {completedCount} completed{dueTodayCount > 0 ? ` · ${dueTodayCount} due today` : ""}{overdueCount > 0 ? <span style={{ color: "#dc2626" }}> · {overdueCount} overdue</span> : ""}</p>}
         </div>
 
         {/* Tab switcher */}
@@ -1475,6 +1516,7 @@ function TaskManager() {
           <div className="controls-buttons" style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
             <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Suggest Next</button>
+            {completedCount > 0 && <button onClick={clearCompleted} style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🗑 Clear Done ({completedCount})</button>}
           </div>
         </div>
 
