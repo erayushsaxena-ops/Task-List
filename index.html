@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Tasks & Goals</title>
+<meta name="theme-color" content="#1f2937">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Tasks">
+<link rel="manifest" href="manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
@@ -33,6 +38,79 @@
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
   .modal-box { background: white; border-radius: 14px; padding: 24px; width: 480px; max-width: 90vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
   .sync-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 600px) {
+    .task-card-actions {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 6px !important;
+      width: 100% !important;
+      margin-top: 8px;
+    }
+    .task-card-actions-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .task-card-inner {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    .input-bar-row {
+      flex-direction: column !important;
+    }
+    .input-bar-row input {
+      width: 100% !important;
+    }
+    .input-bar-row select {
+      width: 100% !important;
+    }
+    .controls-row {
+      flex-direction: column !important;
+      gap: 8px !important;
+      align-items: stretch !important;
+    }
+    .controls-row > * {
+      width: 100%;
+    }
+    .controls-buttons {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .controls-buttons button {
+      flex: 1;
+    }
+    .cat-tabs {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap !important;
+    }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tabs button {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .modal-box {
+      padding: 16px !important;
+      margin: 8px;
+    }
+    .auth-bar-inner {
+      flex-direction: column !important;
+      gap: 8px !important;
+      align-items: flex-start !important;
+    }
+    .goal-section-header {
+      padding: 10px 12px !important;
+    }
+    .goal-section-header .goal-desc {
+      display: none;
+    }
+  }
 </style>
 <script>
 // ╔══════════════════════════════════════════════════════════════════╗
@@ -251,10 +329,10 @@ function AuthBar({ user, syncStatus, onSignIn, onSignOut }) {
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, background: "white", borderRadius: 10, padding: "8px 14px", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+    <div className="auth-bar-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, background: "white", borderRadius: 10, padding: "8px 14px", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
       {user ? (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             {user.photoURL && <img src={user.photoURL} alt="" style={{ width: 24, height: 24, borderRadius: "50%" }} />}
             <span style={{ fontSize: 12, color: "#374151" }}>{user.displayName || user.email}</span>
             <span className="sync-badge" style={{ background: statusColors[syncStatus] + "20", color: statusColors[syncStatus] }}>
@@ -404,7 +482,7 @@ function CategoryBadge({ category }) {
 
 function CategoryTabs({ active, onChange, counts }) {
   return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+    <div className="cat-tabs" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
       <button onClick={() => onChange("all")} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid", background: active === "all" ? "#1f2937" : "white", color: active === "all" ? "white" : "#4b5563", borderColor: active === "all" ? "#1f2937" : "#e5e7eb" }}>All ({counts.all})</button>
       {CATEGORIES.map(cat => (
         <button key={cat.value} onClick={() => onChange(cat.value)} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "1px solid", background: active === cat.value ? cat.color : "white", color: active === cat.value ? "white" : cat.color, borderColor: active === cat.value ? cat.color : `${cat.color}40` }}>{cat.icon} {cat.label} ({counts[cat.value] || 0})</button>
@@ -535,11 +613,11 @@ function GoalsPanel({ goals, onUpdate }) {
           return (
             <div key={tf.key} style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
               {/* Section header */}
-              <button onClick={() => toggleSection(tf.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: tf.bg, border: "none", borderBottom: isExpanded ? "1px solid #e5e7eb" : "none", cursor: "pointer", textAlign: "left" }}>
+              <button className="goal-section-header" onClick={() => toggleSection(tf.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: tf.bg, border: "none", borderBottom: isExpanded ? "1px solid #e5e7eb" : "none", cursor: "pointer", textAlign: "left" }}>
                 <span style={{ fontSize: 20 }}>{tf.icon}</span>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: tf.color }}>{tf.label}</p>
-                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "#9ca3af" }}>{tf.desc}</p>
+                  <p className="goal-desc" style={{ margin: "2px 0 0", fontSize: 11, color: "#9ca3af" }}>{tf.desc}</p>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <span style={{ fontSize: 12, color: "#6b7280", fontWeight: 500 }}>{items.length > 0 ? `${completed}/${items.length}` : "—"}</span>
@@ -606,30 +684,33 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
       onDragOver={(e) => { if (!isManual) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; const rect = cardRef.current.getBoundingClientRect(); onDragOver(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
       onDragLeave={() => onDragLeave(task.id)}
       onDrop={(e) => { e.preventDefault(); if (!isManual) return; const rect = cardRef.current.getBoundingClientRect(); onDrop(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
-      style={{ background: "white", borderLeft: `4px solid ${pColors.badge}`, opacity: task.completed ? 0.5 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
-      {isManual && !task.completed && <span className="drag-handle" title="Drag to reorder">⠿</span>}
-      <button onClick={() => onToggle(task.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: task.completed ? "#9ca3af" : "#d1d5db", background: task.completed ? "#9ca3af" : "transparent", color: task.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{task.completed && "✓"}</button>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {editing ? (
-          <input autoFocus style={{ width: "100%", background: "white", border: "1px solid #d1d5db", borderRadius: 4, padding: "4px 8px", fontSize: 13, outline: "none" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
-        ) : (
-          <p style={{ fontSize: 13, cursor: "pointer", textDecoration: task.completed ? "line-through" : "none", color: task.completed ? "#9ca3af" : "#1f2937", margin: 0 }} onDoubleClick={() => { if (!task.completed) { setEditText(task.text); setEditing(true); } }}>
-            {isSuggested && !task.completed && <span style={{ color: "#3b82f6", fontWeight: 600, marginRight: 4 }}>★</span>}{task.text}
-          </p>
-        )}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-          <span style={{ background: pColors.badge, color: "white", fontSize: 10, padding: "1px 6px", borderRadius: 4 }}>{task.priority}</span>
-          <CategoryBadge category={task.category} />
-          {task.dueDate && <span style={{ fontSize: 11, color: new Date(task.dueDate) < Date.now() && !task.completed ? "#dc2626" : "#6b7280", fontWeight: new Date(task.dueDate) < Date.now() && !task.completed ? 600 : 400 }}>Due: {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}</span>}
-          {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", border: "1px solid #c4b5fd40", padding: "1px 5px", borderRadius: 8 }}>🔄 recurring</span>}
-          <span style={{ fontSize: 11, color: "#9ca3af" }}>{daysSince(task.createdAt)}d ago</span>
+      style={{ background: "white", borderLeft: `4px solid ${pColors.badge}`, opacity: task.completed ? 0.5 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: 12 }}>
+      <div className="task-card-inner" style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+        {isManual && !task.completed && <span className="drag-handle" title="Drag to reorder">⠿</span>}
+        <button onClick={() => onToggle(task.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: task.completed ? "#9ca3af" : "#d1d5db", background: task.completed ? "#9ca3af" : "transparent", color: task.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{task.completed && "✓"}</button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {editing ? (
+            <input autoFocus style={{ width: "100%", background: "white", border: "1px solid #d1d5db", borderRadius: 4, padding: "4px 8px", fontSize: 13, outline: "none", boxSizing: "border-box" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
+          ) : (
+            <p style={{ fontSize: 13, cursor: "pointer", textDecoration: task.completed ? "line-through" : "none", color: task.completed ? "#9ca3af" : "#1f2937", margin: 0, wordBreak: "break-word" }} onDoubleClick={() => { if (!task.completed) { setEditText(task.text); setEditing(true); } }}>
+              {isSuggested && !task.completed && <span style={{ color: "#3b82f6", fontWeight: 600, marginRight: 4 }}>★</span>}{task.text}
+            </p>
+          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+            <span style={{ background: pColors.badge, color: "white", fontSize: 10, padding: "1px 6px", borderRadius: 4 }}>{task.priority}</span>
+            <CategoryBadge category={task.category} />
+            {task.dueDate && <span style={{ fontSize: 11, color: new Date(task.dueDate) < Date.now() && !task.completed ? "#dc2626" : "#6b7280", fontWeight: new Date(task.dueDate) < Date.now() && !task.completed ? 600 : 400 }}>Due: {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}</span>}
+            {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", border: "1px solid #c4b5fd40", padding: "1px 5px", borderRadius: 8 }}>🔄 recurring</span>}
+            <span style={{ fontSize: 11, color: "#9ca3af" }}>{daysSince(task.createdAt)}d ago</span>
+          </div>
+          {/* Action controls - stacked on mobile */}
+          <div className="task-card-actions" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+            <PriorityPicker value={task.priority} onChange={p => onUpdate(task.id, { priority: p })} size="small" />
+            <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} value={task.category} onChange={e => onUpdate(task.id, { category: e.target.value })}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+            <input type="date" style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} value={task.dueDate || ""} onChange={e => onUpdate(task.id, { dueDate: e.target.value })} />
+            <button onClick={() => onDelete(task.id)} style={{ color: "#dc2626", border: "1px solid #fecaca", background: "#fef2f2", cursor: "pointer", padding: "3px 8px", borderRadius: 6, fontSize: 11 }}>Delete</button>
+          </div>
         </div>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-        <PriorityPicker value={task.priority} onChange={p => onUpdate(task.id, { priority: p })} size="small" />
-        <select style={{ fontSize: 11, background: "transparent", border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 4px" }} value={task.category} onChange={e => onUpdate(task.id, { category: e.target.value })}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
-        <input type="date" style={{ fontSize: 11, background: "transparent", border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 4px", width: 115 }} value={task.dueDate || ""} onChange={e => onUpdate(task.id, { dueDate: e.target.value })} />
-        <button onClick={() => onDelete(task.id)} style={{ color: "#9ca3af", border: "none", background: "none", cursor: "pointer", padding: 2, marginLeft: 4 }}>✕</button>
       </div>
     </div>
   );
@@ -831,10 +912,12 @@ function TaskManager() {
 
         {/* Input */}
         <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 12, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 12, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 8px", width: 110 }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
-            <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 14px", fontSize: 13, outline: "none" }} placeholder="Type a task and press Enter..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") addTask(); }} />
-            <button onClick={addTask} style={{ background: "#3b82f6", color: "white", border: "none", padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Add</button>
+          <div className="input-bar-row" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 12, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 8px", flexShrink: 0 }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+            <div style={{ display: "flex", gap: 8, flex: 1, minWidth: 0 }}>
+              <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 14px", fontSize: 13, outline: "none", minWidth: 0, boxSizing: "border-box" }} placeholder="Type a task..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") addTask(); }} />
+              <button onClick={addTask} style={{ background: "#3b82f6", color: "white", border: "none", padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
             <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Priority:</span>
@@ -843,24 +926,28 @@ function TaskManager() {
         </div>
 
         {/* Controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Sort:</label>
-            <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "4px 8px" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              <option value="manual">Manual (Drag)</option><option value="priority">Priority</option><option value="category">Category</option><option value="dueDate">Due Date</option><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="smart">Smart (Score)</option>
-            </select>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Priority:</label>
-            <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "4px 8px" }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
-              <option value="all">All</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-            </select>
-          </div>
-          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#6b7280", cursor: "pointer" }}>
-            <input type="checkbox" checked={showCompleted} onChange={e => setShowCompleted(e.target.checked)} /> Show done
+        <div className="controls-row" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Sort:</label>
+              <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 8px" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                <option value="manual">Manual (Drag)</option><option value="priority">Priority</option><option value="category">Category</option><option value="dueDate">Due Date</option><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="smart">Smart (Score)</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Priority:</label>
+              <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 8px" }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
+                <option value="all">All</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+              </select>
+            </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#6b7280", cursor: "pointer" }}>
+              <input type="checkbox" checked={showCompleted} onChange={e => setShowCompleted(e.target.checked)} /> Show done
           </label>
-          <button onClick={() => setShowRecurring(true)} style={{ marginLeft: "auto", background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
-          <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Suggest Next Task</button>
+          </div>
+          <div className="controls-buttons" style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
+            <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Suggest Next</button>
+          </div>
         </div>
 
         {sortBy === "manual" && sorted.length > 1 && (
@@ -917,6 +1004,14 @@ function TaskManager() {
 }
 
 ReactDOM.render(<TaskManager />, document.getElementById("root"));
+</script>
+<script>
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
