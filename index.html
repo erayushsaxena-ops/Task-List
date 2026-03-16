@@ -534,11 +534,16 @@ function loadGoals() {
   return { items: [] };
 }
 
-function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit, onAdd, expanded, onToggleExpand }) {
+function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit, onAdd, expanded, onToggleExpand, onCreateRecurring }) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(goal.text);
   const [addingChild, setAddingChild] = useState(false);
   const [childText, setChildText] = useState("");
+  const [showRecurPicker, setShowRecurPicker] = useState(false);
+  const [recurType, setRecurType] = useState("daily");
+  const [recurDays, setRecurDays] = useState([1]);
+  const [recurCategory, setRecurCategory] = useState("work");
+  const [recurCreated, setRecurCreated] = useState(false);
 
   const lv = GOAL_LEVELS[levelIdx];
   const nextLevel = levelIdx < GOAL_LEVELS.length - 1 ? GOAL_LEVELS[levelIdx + 1] : null;
@@ -585,7 +590,61 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
               <span style={{ fontSize: 10, background: lv.bg, color: lv.color, padding: "1px 6px", borderRadius: 8, fontWeight: 600 }}>{lv.icon} {lv.short}</span>
               {hasChildren && <span style={{ fontSize: 10, color: "#6b7280", background: "#f3f4f6", padding: "1px 6px", borderRadius: 8 }}>{childCompleted}/{children.length} sub-goals</span>}
+              {goal.level === "monthly" && !goal.completed && onCreateRecurring && !recurCreated && (
+                <button onClick={() => setShowRecurPicker(prev => !prev)} style={{ fontSize: 10, background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "1px 6px", borderRadius: 8, cursor: "pointer", fontWeight: 500 }}>🔄 Make Recurring</button>
+              )}
+              {recurCreated && <span style={{ fontSize: 10, background: "#dcfce7", color: "#16a34a", padding: "1px 6px", borderRadius: 8, fontWeight: 500 }}>✓ Recurring added</span>}
             </div>
+
+            {/* Recurring task picker for monthly goals */}
+            {showRecurPicker && goal.level === "monthly" && (
+              <div style={{ marginTop: 8, background: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: 8, padding: 10 }}>
+                <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: "#7c3aed" }}>Create recurring task from this goal</p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 3 }}>Schedule</label>
+                    <select value={recurType} onChange={e => setRecurType(e.target.value)} style={{ fontSize: 11, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 6px" }}>
+                      <option value="daily">Every day</option>
+                      <option value="weekdays">Weekdays (Mon-Fri)</option>
+                      <option value="weekly">Weekly (pick days)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 3 }}>Category</label>
+                    <select value={recurCategory} onChange={e => setRecurCategory(e.target.value)} style={{ fontSize: 11, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 6px" }}>
+                      {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {recurType === "weekly" && (
+                  <div style={{ marginBottom: 8 }}>
+                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Pick days</label>
+                    <div style={{ display: "flex", gap: 3 }}>
+                      {DAY_NAMES.map((name, i) => (
+                        <button key={i} className={`day-chip ${recurDays.includes(i) ? "active" : ""}`} onClick={() => setRecurDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i].sort())} style={{ width: 28, height: 24, fontSize: 10 }}>{name}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => {
+                    onCreateRecurring({
+                      id: generateId(),
+                      text: goal.text,
+                      type: recurType,
+                      days: recurType === "weekly" ? recurDays : [],
+                      monthDays: [],
+                      priority: "medium",
+                      category: recurCategory,
+                      enabled: true,
+                    });
+                    setShowRecurPicker(false);
+                    setRecurCreated(true);
+                  }} style={{ background: "#7c3aed", color: "white", border: "none", padding: "5px 12px", borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>Create Recurring Task</button>
+                  <button onClick={() => setShowRecurPicker(false)} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "5px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Cancel</button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Delete */}
@@ -599,7 +658,7 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
             {children.map(child => {
               const childLevelIdx = GOAL_LEVELS.findIndex(l => l.key === child.level);
               return (
-                <GoalNode key={child.id} goal={child} level={child.level} levelIdx={childLevelIdx >= 0 ? childLevelIdx : levelIdx + 1} allGoals={allGoals} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onAdd={onAdd} expanded={expanded} onToggleExpand={onToggleExpand} />
+                <GoalNode key={child.id} goal={child} level={child.level} levelIdx={childLevelIdx >= 0 ? childLevelIdx : levelIdx + 1} allGoals={allGoals} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onAdd={onAdd} expanded={expanded} onToggleExpand={onToggleExpand} onCreateRecurring={onCreateRecurring} />
               );
             })}
 
@@ -622,7 +681,7 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
   );
 }
 
-function GoalsPanel({ goals, onUpdate }) {
+function GoalsPanel({ goals, onUpdate, onCreateRecurring }) {
   const [inputText, setInputText] = useState("");
   const [expanded, setExpanded] = useState({});
 
@@ -710,7 +769,7 @@ function GoalsPanel({ goals, onUpdate }) {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {rootGoals.map(goal => (
-            <GoalNode key={goal.id} goal={goal} level="20y" levelIdx={0} allGoals={allGoals} onToggle={toggleGoal} onDelete={deleteGoal} onEdit={editGoal} onAdd={addGoal} expanded={expanded} onToggleExpand={toggleExpand} />
+            <GoalNode key={goal.id} goal={goal} level="20y" levelIdx={0} allGoals={allGoals} onToggle={toggleGoal} onDelete={deleteGoal} onEdit={editGoal} onAdd={addGoal} expanded={expanded} onToggleExpand={toggleExpand} onCreateRecurring={onCreateRecurring} />
           ))}
         </div>
       )}
@@ -1057,7 +1116,10 @@ function TaskManager() {
         </div>
         </>
         ) : (
-          <GoalsPanel goals={goals} onUpdate={setGoals} />
+          <GoalsPanel goals={goals} onUpdate={setGoals} onCreateRecurring={(rule) => {
+            const updated = [...recurringRules, rule];
+            handleSaveRules(updated);
+          }} />
         )}
       </div>
 
