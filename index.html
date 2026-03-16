@@ -1518,6 +1518,7 @@ function TaskManager() {
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [newCategory, setNewCategory] = useState("work");
   const [newPriority, setNewPriority] = useState("medium");
+  const [newDueDate, setNewDueDate] = useState("");
   const [dragId, setDragId] = useState(null);
   const [dragOverState, setDragOverState] = useState({});
   const [recurringRules, setRecurringRules] = useState(loadRecurringRules);
@@ -1645,8 +1646,9 @@ function TaskManager() {
     else if (/^!\s*/.test(text)) { priority = "medium"; cleanText = text.replace(/^!\s*/, ""); }
     else if (/^~\s*/.test(text)) { priority = "low"; cleanText = text.replace(/^~\s*/, ""); }
     if (!cleanText.trim()) return; // prevent empty tasks from shortcut prefixes
-    setTasks(prev => [...prev, { id: generateId(), text: cleanText, priority, category: newCategory, dueDate: "", completed: false, createdAt: new Date().toISOString().split("T")[0] }]);
+    setTasks(prev => [...prev, { id: generateId(), text: cleanText, priority, category: newCategory, dueDate: newDueDate, completed: false, createdAt: new Date().toISOString().split("T")[0] }]);
     setInput("");
+    setNewDueDate("");
   };
 
   const toggleTask = (id) => {
@@ -1772,9 +1774,16 @@ function TaskManager() {
               <button onClick={addTask} style={{ background: "#3b82f6", color: "white", border: "none", padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-            <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Priority:</span>
-            <PriorityPicker value={newPriority} onChange={setNewPriority} />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Priority:</span>
+              <PriorityPicker value={newPriority} onChange={setNewPriority} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Due:</span>
+              <input type="date" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} />
+              {newDueDate && <button onClick={() => setNewDueDate("")} style={{ fontSize: 11, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", padding: 0 }}>✕</button>}
+            </div>
           </div>
         </div>
 
@@ -1815,7 +1824,7 @@ function TaskManager() {
                 <span style={{ fontSize: 11, color: "#6b8cce", fontWeight: 600 }}>Suggestion {suggestionIndex + 1} of {suggestionList.length}</span>
                 <span style={{ fontSize: 10, color: "#93aed4", background: "#dbeafe", padding: "2px 8px", borderRadius: 8 }}>Score: {currentSuggestion.score}</span>
               </div>
-              <p onClick={() => { const el = document.getElementById(`task-${suggestedTask.id}`); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #60a5fa, 0 0 12px rgba(96,165,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); } }} style={{ fontSize: 14, color: "#1d4ed8", margin: 0, fontWeight: 500, cursor: "pointer" }}>★ {suggestedTask.text}<span style={{ marginLeft: 8 }}><CategoryBadge category={suggestedTask.category} /></span> <span style={{ fontSize: 10, color: "#93aed4" }}>↓ tap to scroll</span></p>
+              <p onClick={() => { const el = document.getElementById(`task-${suggestedTask.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #60a5fa, 0 0 12px rgba(96,165,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); } }} style={{ fontSize: 14, color: "#1d4ed8", margin: 0, fontWeight: 500, cursor: "pointer" }}>★ {suggestedTask.text}<span style={{ marginLeft: 8 }}><CategoryBadge category={suggestedTask.category} /></span> <span style={{ fontSize: 10, color: "#93aed4" }}>↓ tap to scroll</span></p>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
                 {!isLast && <button onClick={skipSuggestion} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Skip → Show Next</button>}
                 {isLast && suggestionList.length > 1 && <button onClick={() => setSuggestionIndex(0)} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>↻ Back to Top Pick</button>}
