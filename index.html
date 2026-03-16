@@ -104,12 +104,6 @@
       gap: 8px !important;
       align-items: flex-start !important;
     }
-    .goal-section-header {
-      padding: 10px 12px !important;
-    }
-    .goal-section-header .goal-desc {
-      display: none;
-    }
   }
 </style>
 <script>
@@ -509,154 +503,222 @@ function PriorityPicker({ value, onChange, size }) {
   );
 }
 
-// ── Goals Panel ──
-const GOAL_TIMEFRAMES = [
-  { key: "20y", label: "20-Year Vision", icon: "🌟", color: "#7c3aed", bg: "#f5f3ff", desc: "Where do you see yourself in 20 years?" },
-  { key: "10y", label: "10-Year Goals", icon: "🎯", color: "#2563eb", bg: "#eff6ff", desc: "Major milestones for the next decade" },
-  { key: "5y", label: "5-Year Goals", icon: "🚀", color: "#0891b2", bg: "#ecfeff", desc: "Medium-term objectives to work toward" },
-  { key: "1y", label: "1-Year Goals", icon: "📅", color: "#059669", bg: "#ecfdf5", desc: "What to accomplish this year" },
-  { key: "monthly", label: "Monthly Goals", icon: "📋", color: "#d97706", bg: "#fffbeb", desc: "Focus areas for this month" },
+// ── Goals Panel (Hierarchical) ──
+const GOAL_LEVELS = [
+  { key: "20y", label: "20-Year Vision", short: "20Y", icon: "🌟", color: "#7c3aed", bg: "#f5f3ff", border: "#c4b5fd", childLabel: "Break into 10-Year Goals" },
+  { key: "10y", label: "10-Year Goals", short: "10Y", icon: "🎯", color: "#2563eb", bg: "#eff6ff", border: "#93c5fd", childLabel: "Break into 5-Year Goals" },
+  { key: "5y", label: "5-Year Goals", short: "5Y", icon: "🚀", color: "#0891b2", bg: "#ecfeff", border: "#67e8f9", childLabel: "Break into 1-Year Goals" },
+  { key: "1y", label: "1-Year Goals", short: "1Y", icon: "📅", color: "#059669", bg: "#ecfdf5", border: "#6ee7b7", childLabel: "Break into Monthly Goals" },
+  { key: "monthly", label: "Monthly Goals", short: "Mo", icon: "📋", color: "#d97706", bg: "#fffbeb", border: "#fcd34d", childLabel: null },
 ];
 
 function loadGoals() {
   try {
     const saved = localStorage.getItem(GOALS_STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migration: if old flat format, convert to new format
+      if (parsed && !parsed.items && parsed["20y"]) {
+        const items = [];
+        GOAL_LEVELS.forEach(level => {
+          (parsed[level.key] || []).forEach(g => {
+            items.push({ ...g, level: level.key, parentId: null });
+          });
+        });
+        return { items };
+      }
+      return parsed;
+    }
   } catch (e) {}
-  const empty = {};
-  GOAL_TIMEFRAMES.forEach(t => { empty[t.key] = []; });
-  return empty;
+  return { items: [] };
 }
 
-function GoalItem({ goal, onToggle, onDelete, onEdit, color }) {
+function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit, onAdd, expanded, onToggleExpand }) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(goal.text);
+  const [addingChild, setAddingChild] = useState(false);
+  const [childText, setChildText] = useState("");
+
+  const lv = GOAL_LEVELS[levelIdx];
+  const nextLevel = levelIdx < GOAL_LEVELS.length - 1 ? GOAL_LEVELS[levelIdx + 1] : null;
+  const children = allGoals.filter(g => g.parentId === goal.id);
+  const childCompleted = children.filter(g => g.completed).length;
+  const hasChildren = children.length > 0;
+  const isExpanded = expanded[goal.id] !== false; // default expanded
 
   const handleSave = () => {
     if (editText.trim()) onEdit(goal.id, editText.trim());
     setEditing(false);
   };
 
+  const handleAddChild = () => {
+    if (!childText.trim() || !nextLevel) return;
+    onAdd(childText.trim(), nextLevel.key, goal.id);
+    setChildText("");
+    setAddingChild(false);
+  };
+
+  const indentPx = levelIdx * 4;
+
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 12px", background: goal.completed ? "#f9fafb" : "white", borderRadius: 8, border: "1px solid #e5e7eb", opacity: goal.completed ? 0.5 : 1, transition: "all 0.15s" }}>
-      <button onClick={() => onToggle(goal.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: goal.completed ? color : "#d1d5db", background: goal.completed ? color : "transparent", color: goal.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{goal.completed && "✓"}</button>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {editing ? (
-          <input autoFocus style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 13, outline: "none", boxSizing: "border-box" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
-        ) : (
-          <p style={{ margin: 0, fontSize: 13, color: goal.completed ? "#9ca3af" : "#1f2937", textDecoration: goal.completed ? "line-through" : "none", cursor: "pointer" }} onDoubleClick={() => { if (!goal.completed) { setEditText(goal.text); setEditing(true); } }}>{goal.text}</p>
+    <div style={{ marginLeft: indentPx }}>
+      {/* Goal card */}
+      <div style={{ background: goal.completed ? "#f9fafb" : "white", borderLeft: `3px solid ${lv.color}`, borderRadius: 8, border: `1px solid ${goal.completed ? "#e5e7eb" : lv.border}`, borderLeftWidth: 3, borderLeftColor: lv.color, marginBottom: 6, opacity: goal.completed ? 0.6 : 1, transition: "all 0.15s" }}>
+        <div style={{ padding: "10px 12px", display: "flex", alignItems: "flex-start", gap: 8 }}>
+          {/* Expand/collapse toggle */}
+          {(hasChildren || nextLevel) && (
+            <button onClick={() => onToggleExpand(goal.id)} style={{ border: "none", background: "none", cursor: "pointer", padding: 0, fontSize: 12, color: "#9ca3af", marginTop: 3, flexShrink: 0, width: 16, textAlign: "center", transition: "transform 0.2s", transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}>▶</button>
+          )}
+          {!hasChildren && !nextLevel && <span style={{ width: 16, flexShrink: 0 }}></span>}
+
+          {/* Checkbox */}
+          <button onClick={() => onToggle(goal.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: goal.completed ? lv.color : "#d1d5db", background: goal.completed ? lv.color : "transparent", color: goal.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{goal.completed && "✓"}</button>
+
+          {/* Content */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {editing ? (
+              <input autoFocus style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 13, outline: "none", boxSizing: "border-box" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
+            ) : (
+              <p style={{ margin: 0, fontSize: 13, color: goal.completed ? "#9ca3af" : "#1f2937", textDecoration: goal.completed ? "line-through" : "none", cursor: "pointer", wordBreak: "break-word" }} onDoubleClick={() => { if (!goal.completed) { setEditText(goal.text); setEditing(true); } }}>{goal.text}</p>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 10, background: lv.bg, color: lv.color, padding: "1px 6px", borderRadius: 8, fontWeight: 600 }}>{lv.icon} {lv.short}</span>
+              {hasChildren && <span style={{ fontSize: 10, color: "#6b7280", background: "#f3f4f6", padding: "1px 6px", borderRadius: 8 }}>{childCompleted}/{children.length} sub-goals</span>}
+            </div>
+          </div>
+
+          {/* Delete */}
+          <button onClick={() => onDelete(goal.id)} style={{ color: "#d1d5db", border: "none", background: "none", cursor: "pointer", padding: 2, fontSize: 13, flexShrink: 0 }}>✕</button>
+        </div>
+
+        {/* Children area */}
+        {isExpanded && nextLevel && (
+          <div style={{ borderTop: hasChildren || addingChild ? "1px solid #f3f4f6" : "none", padding: hasChildren || addingChild ? "8px 12px 10px" : "0 12px" }}>
+            {/* Child goals */}
+            {children.map(child => {
+              const childLevelIdx = GOAL_LEVELS.findIndex(l => l.key === child.level);
+              return (
+                <GoalNode key={child.id} goal={child} level={child.level} levelIdx={childLevelIdx >= 0 ? childLevelIdx : levelIdx + 1} allGoals={allGoals} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onAdd={onAdd} expanded={expanded} onToggleExpand={onToggleExpand} />
+              );
+            })}
+
+            {/* Add child button / input */}
+            {addingChild ? (
+              <div style={{ display: "flex", gap: 6, marginTop: 4, marginLeft: (levelIdx + 1) * 4 }}>
+                <input autoFocus style={{ flex: 1, background: nextLevel.bg, border: `1px solid ${nextLevel.border}`, borderRadius: 6, padding: "6px 10px", fontSize: 12, outline: "none", boxSizing: "border-box" }} placeholder={`Add ${nextLevel.short} goal...`} value={childText} onChange={e => setChildText(e.target.value)} onKeyDown={e => { if (e.key === "Enter") handleAddChild(); if (e.key === "Escape") { setAddingChild(false); setChildText(""); } }} />
+                <button onClick={handleAddChild} style={{ background: nextLevel.color, color: "white", border: "none", padding: "6px 10px", borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>Add</button>
+                <button onClick={() => { setAddingChild(false); setChildText(""); }} style={{ background: "white", color: "#6b7280", border: "1px solid #e5e7eb", padding: "6px 8px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>✕</button>
+              </div>
+            ) : (
+              <button onClick={() => setAddingChild(true)} style={{ display: "flex", alignItems: "center", gap: 4, marginTop: hasChildren ? 4 : 0, marginLeft: (levelIdx + 1) * 4, background: "none", border: `1px dashed ${nextLevel.border}`, padding: "5px 10px", borderRadius: 6, fontSize: 11, color: nextLevel.color, cursor: "pointer", fontWeight: 500 }}>
+                <span style={{ fontSize: 13 }}>+</span> {lv.childLabel}
+              </button>
+            )}
+          </div>
         )}
-        <p style={{ margin: "4px 0 0", fontSize: 11, color: "#9ca3af" }}>Added {new Date(goal.createdAt).toLocaleDateString()}</p>
       </div>
-      <button onClick={() => onDelete(goal.id)} style={{ color: "#9ca3af", border: "none", background: "none", cursor: "pointer", padding: 2, fontSize: 14 }}>✕</button>
     </div>
   );
 }
 
 function GoalsPanel({ goals, onUpdate }) {
-  const [expandedSections, setExpandedSections] = useState(() => {
-    const init = {};
-    GOAL_TIMEFRAMES.forEach(t => { init[t.key] = true; });
-    return init;
-  });
-  const [inputValues, setInputValues] = useState(() => {
-    const init = {};
-    GOAL_TIMEFRAMES.forEach(t => { init[t.key] = ""; });
-    return init;
-  });
+  const [inputText, setInputText] = useState("");
+  const [expanded, setExpanded] = useState({});
 
-  const toggleSection = (key) => setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const allGoals = goals.items || [];
+  const rootGoals = allGoals.filter(g => !g.parentId);
 
-  const addGoal = (timeframe) => {
-    const text = (inputValues[timeframe] || "").trim();
-    if (!text) return;
-    const updated = { ...goals };
-    updated[timeframe] = [...(updated[timeframe] || []), { id: generateId(), text, completed: false, createdAt: new Date().toISOString().split("T")[0] }];
-    onUpdate(updated);
-    setInputValues(prev => ({ ...prev, [timeframe]: "" }));
+  const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: prev[id] === false ? true : false }));
+
+  const addGoal = (text, level, parentId) => {
+    const newGoal = { id: generateId(), text, level, parentId: parentId || null, completed: false, createdAt: new Date().toISOString().split("T")[0] };
+    onUpdate({ items: [...allGoals, newGoal] });
   };
 
-  const toggleGoal = (timeframe, goalId) => {
-    const updated = { ...goals };
-    updated[timeframe] = (updated[timeframe] || []).map(g => g.id === goalId ? { ...g, completed: !g.completed } : g);
-    onUpdate(updated);
+  const addRootGoal = () => {
+    if (!inputText.trim()) return;
+    addGoal(inputText.trim(), "20y", null);
+    setInputText("");
   };
 
-  const deleteGoal = (timeframe, goalId) => {
-    const updated = { ...goals };
-    updated[timeframe] = (updated[timeframe] || []).filter(g => g.id !== goalId);
-    onUpdate(updated);
+  const toggleGoal = (id) => {
+    onUpdate({ items: allGoals.map(g => g.id === id ? { ...g, completed: !g.completed } : g) });
   };
 
-  const editGoal = (timeframe, goalId, newText) => {
-    const updated = { ...goals };
-    updated[timeframe] = (updated[timeframe] || []).map(g => g.id === goalId ? { ...g, text: newText } : g);
-    onUpdate(updated);
+  const deleteGoal = (id) => {
+    // Delete goal and all descendants
+    const toDelete = new Set();
+    const collect = (parentId) => {
+      allGoals.forEach(g => { if (g.parentId === parentId) { toDelete.add(g.id); collect(g.id); } });
+    };
+    toDelete.add(id);
+    collect(id);
+    onUpdate({ items: allGoals.filter(g => !toDelete.has(g.id)) });
   };
 
-  const totalGoals = GOAL_TIMEFRAMES.reduce((sum, t) => sum + (goals[t.key] || []).length, 0);
-  const completedGoals = GOAL_TIMEFRAMES.reduce((sum, t) => sum + (goals[t.key] || []).filter(g => g.completed).length, 0);
+  const editGoal = (id, newText) => {
+    onUpdate({ items: allGoals.map(g => g.id === id ? { ...g, text: newText } : g) });
+  };
+
+  const totalGoals = allGoals.length;
+  const completedGoals = allGoals.filter(g => g.completed).length;
+
+  // Count by level
+  const levelCounts = {};
+  GOAL_LEVELS.forEach(l => { levelCounts[l.key] = allGoals.filter(g => g.level === l.key).length; });
 
   return (
     <div>
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>{totalGoals} goals · {completedGoals} completed · {totalGoals - completedGoals} active</p>
+      <div style={{ textAlign: "center", marginBottom: 16 }}>
+        <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>{totalGoals} goals · {completedGoals} completed</p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {GOAL_TIMEFRAMES.map(tf => {
-          const items = goals[tf.key] || [];
-          const completed = items.filter(g => g.completed).length;
-          const isExpanded = expandedSections[tf.key];
-          const progress = items.length > 0 ? Math.round((completed / items.length) * 100) : 0;
-
-          return (
-            <div key={tf.key} style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-              {/* Section header */}
-              <button className="goal-section-header" onClick={() => toggleSection(tf.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: tf.bg, border: "none", borderBottom: isExpanded ? "1px solid #e5e7eb" : "none", cursor: "pointer", textAlign: "left" }}>
-                <span style={{ fontSize: 20 }}>{tf.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: tf.color }}>{tf.label}</p>
-                  <p className="goal-desc" style={{ margin: "2px 0 0", fontSize: 11, color: "#9ca3af" }}>{tf.desc}</p>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <span style={{ fontSize: 12, color: "#6b7280", fontWeight: 500 }}>{items.length > 0 ? `${completed}/${items.length}` : "—"}</span>
-                  {items.length > 0 && (
-                    <div style={{ width: 60, height: 4, background: "#e5e7eb", borderRadius: 2, marginTop: 4 }}>
-                      <div style={{ width: `${progress}%`, height: "100%", background: tf.color, borderRadius: 2, transition: "width 0.3s" }}></div>
-                    </div>
-                  )}
-                </div>
-                <span style={{ fontSize: 14, color: "#9ca3af", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▼</span>
-              </button>
-
-              {/* Section content */}
-              {isExpanded && (
-                <div style={{ padding: 12 }}>
-                  {/* Goal list */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: items.length > 0 ? 10 : 0 }}>
-                    {items.map(goal => (
-                      <GoalItem key={goal.id} goal={goal} color={tf.color} onToggle={(id) => toggleGoal(tf.key, id)} onDelete={(id) => deleteGoal(tf.key, id)} onEdit={(id, text) => editGoal(tf.key, id, text)} />
-                    ))}
-                  </div>
-
-                  {/* Add goal input */}
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none" }} placeholder={`Add a ${tf.label.toLowerCase().replace(" goals", "").replace(" vision", "")} goal...`} value={inputValues[tf.key] || ""} onChange={e => setInputValues(prev => ({ ...prev, [tf.key]: e.target.value }))} onKeyDown={e => { if (e.key === "Enter") addGoal(tf.key); }} />
-                    <button onClick={() => addGoal(tf.key)} style={{ background: tf.color, color: "white", border: "none", padding: "8px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Add</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      {/* Level summary chips */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap", justifyContent: "center" }}>
+        {GOAL_LEVELS.map(lv => (
+          <span key={lv.key} style={{ fontSize: 11, background: lv.bg, color: lv.color, border: `1px solid ${lv.border}`, padding: "3px 10px", borderRadius: 12, fontWeight: 500 }}>{lv.icon} {lv.short}: {levelCounts[lv.key] || 0}</span>
+        ))}
       </div>
+
+      {/* Flow indicator */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginBottom: 16 }}>
+        {GOAL_LEVELS.map((lv, i) => (
+          <React.Fragment key={lv.key}>
+            <span style={{ fontSize: 16 }}>{lv.icon}</span>
+            {i < GOAL_LEVELS.length - 1 && <span style={{ fontSize: 11, color: "#d1d5db" }}>→</span>}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Add 20-year vision input */}
+      <div style={{ background: GOAL_LEVELS[0].bg, borderRadius: 10, border: `1px solid ${GOAL_LEVELS[0].border}`, padding: 12, marginBottom: 16 }}>
+        <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 600, color: GOAL_LEVELS[0].color }}>{GOAL_LEVELS[0].icon} Add a 20-Year Vision</p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input style={{ flex: 1, background: "white", border: `1px solid ${GOAL_LEVELS[0].border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Where do you see yourself in 20 years?" value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => { if (e.key === "Enter") addRootGoal(); }} />
+          <button onClick={addRootGoal} style={{ background: GOAL_LEVELS[0].color, color: "white", border: "none", padding: "8px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
+        </div>
+      </div>
+
+      {/* Goal tree */}
+      {rootGoals.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px 20px", color: "#9ca3af", background: "white", borderRadius: 12, border: "1px solid #e5e7eb" }}>
+          <p style={{ fontSize: 28, marginBottom: 8 }}>🌟</p>
+          <p style={{ fontSize: 14, fontWeight: 500, color: "#6b7280", margin: "0 0 4px" }}>Start with your 20-year vision</p>
+          <p style={{ fontSize: 12, margin: 0 }}>Add a big dream above, then break it down step by step</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {rootGoals.map(goal => (
+            <GoalNode key={goal.id} goal={goal} level="20y" levelIdx={0} allGoals={allGoals} onToggle={toggleGoal} onDelete={deleteGoal} onEdit={editGoal} onAdd={addGoal} expanded={expanded} onToggleExpand={toggleExpand} />
+          ))}
+        </div>
+      )}
 
       {/* Tips */}
       <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 16, marginTop: 24 }}>
-        <p style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 8, marginTop: 0 }}>Goal-setting tips</p>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 8, marginTop: 0 }}>How it works</p>
         <div style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.8 }}>
-          Start with your 20-year vision and work backwards. Break big dreams into 10-year and 5-year milestones, then define yearly targets. Monthly goals should be specific actions that move you toward your 1-year goals. Double-click to edit. Review regularly!
+          Start with your 20-year vision. Click "Break into 10-Year Goals" to add sub-goals. Keep breaking down 10Y → 5Y → 1Y → Monthly until you have actionable monthly steps. Click ▶ to expand/collapse. Double-click to edit. Deleting a goal removes its sub-goals too.
         </div>
       </div>
     </div>
