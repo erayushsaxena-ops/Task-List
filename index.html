@@ -1497,7 +1497,7 @@ function TaskManager() {
   const [sortBy, setSortBy] = useState("manual");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
-  const [showCompleted, setShowCompleted] = useState(false);
+  const [showCompletedSection, setShowCompletedSection] = useState(false);
   const [suggestionList, setSuggestionList] = useState([]);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [newCategory, setNewCategory] = useState("work");
@@ -1653,7 +1653,7 @@ function TaskManager() {
     let filtered = [...tasks];
     if (filterCategory !== "all") filtered = filtered.filter(t => t.category === filterCategory);
     if (filterPriority !== "all") filtered = filtered.filter(t => t.priority === filterPriority);
-    if (!showCompleted) filtered = filtered.filter(t => !t.completed);
+    filtered = filtered.filter(t => !t.completed);
     if (sortBy === "priority") filtered.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
     else if (sortBy === "dueDate") filtered.sort((a, b) => { if (!a.dueDate && !b.dueDate) return 0; if (!a.dueDate) return 1; if (!b.dueDate) return -1; return new Date(a.dueDate) - new Date(b.dueDate); });
     else if (sortBy === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1744,14 +1744,10 @@ function TaskManager() {
                 <option value="all">All</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
               </select>
             </div>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#6b7280", cursor: "pointer" }}>
-              <input type="checkbox" checked={showCompleted} onChange={e => setShowCompleted(e.target.checked)} /> Show done
-          </label>
           </div>
           <div className="controls-buttons" style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
             <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Suggest Next</button>
-            {completedCount > 0 && <button onClick={clearCompleted} style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🗑 Clear Done ({completedCount})</button>}
           </div>
         </div>
 
@@ -1789,6 +1785,46 @@ function TaskManager() {
             <TaskItem key={task.id} task={task} onToggle={toggleTask} onDelete={deleteTask} onUpdate={updateTask} isSuggested={currentSuggestion && currentSuggestion.id === task.id} isDragging={dragId === task.id} dragOverPos={dragOverState.id === task.id ? dragOverState.pos : null} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} sortBy={sortBy} />
           ))}
         </div>
+
+        {/* Completed Tasks Section */}
+        {completedCount > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <button onClick={() => setShowCompletedSection(prev => !prev)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 10, padding: "10px 14px", cursor: "pointer", transition: "all 0.15s" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#6b7280" }}>✅ Completed Tasks ({completedCount})</span>
+              <span style={{ fontSize: 12, color: "#9ca3af", transition: "transform 0.2s", transform: showCompletedSection ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+            </button>
+            {showCompletedSection && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                  <button onClick={clearCompleted} style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🗑 Remove All Completed</button>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {tasks.filter(t => t.completed).map(task => {
+                    const pColors = PRIORITY_COLORS[task.priority];
+                    const cat = CATEGORIES.find(c => c.value === task.category) || CATEGORIES[CATEGORIES.length - 1];
+                    return (
+                      <div key={task.id} style={{ background: "#f9fafb", borderLeft: `3px solid ${pColors.badge}`, borderRadius: 8, border: "1px solid #e5e7eb", borderLeftWidth: 3, borderLeftColor: pColors.badge, padding: "10px 12px", opacity: 0.7 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <button onClick={() => toggleTask(task.id)} style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #9ca3af", background: "#9ca3af", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>✓</button>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ margin: 0, fontSize: 13, color: "#9ca3af", textDecoration: "line-through", wordBreak: "break-word" }}>{task.text}</p>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                              <span style={{ background: pColors.badge + "30", color: pColors.badge, fontSize: 10, padding: "1px 6px", borderRadius: 4 }}>{task.priority}</span>
+                              <span style={{ fontSize: 10, background: cat.bg, color: cat.color, padding: "1px 6px", borderRadius: 10 }}>{cat.icon} {cat.label}</span>
+                              {task.completedAt && <span style={{ fontSize: 10, color: "#9ca3af" }}>Done: {new Date(task.completedAt + "T00:00:00").toLocaleDateString()}</span>}
+                              {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", padding: "1px 5px", borderRadius: 8 }}>🔄</span>}
+                            </div>
+                          </div>
+                          <button onClick={() => { setTasks(prev => prev.filter(t => t.id !== task.id)); }} style={{ color: "#d1d5db", border: "none", background: "none", cursor: "pointer", fontSize: 13, flexShrink: 0 }}>✕</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Quick tips */}
         <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 16, marginTop: 24 }}>
