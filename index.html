@@ -540,10 +540,12 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
   const [addingChild, setAddingChild] = useState(false);
   const [childText, setChildText] = useState("");
   const [showRecurPicker, setShowRecurPicker] = useState(false);
+  const [recurTasks, setRecurTasks] = useState([]); // list of recurring tasks created from this goal
+  const [recurName, setRecurName] = useState(goal.text);
   const [recurType, setRecurType] = useState("daily");
   const [recurDays, setRecurDays] = useState([1]);
   const [recurCategory, setRecurCategory] = useState("work");
-  const [recurCreated, setRecurCreated] = useState(false);
+  const [recurPriority, setRecurPriority] = useState("medium");
 
   const lv = GOAL_LEVELS[levelIdx];
   const nextLevel = levelIdx < GOAL_LEVELS.length - 1 ? GOAL_LEVELS[levelIdx + 1] : null;
@@ -590,58 +592,116 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
               <span style={{ fontSize: 10, background: lv.bg, color: lv.color, padding: "1px 6px", borderRadius: 8, fontWeight: 600 }}>{lv.icon} {lv.short}</span>
               {hasChildren && <span style={{ fontSize: 10, color: "#6b7280", background: "#f3f4f6", padding: "1px 6px", borderRadius: 8 }}>{childCompleted}/{children.length} sub-goals</span>}
-              {goal.level === "monthly" && !goal.completed && onCreateRecurring && !recurCreated && (
-                <button onClick={() => setShowRecurPicker(prev => !prev)} style={{ fontSize: 10, background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "1px 6px", borderRadius: 8, cursor: "pointer", fontWeight: 500 }}>🔄 Make Recurring</button>
+              {goal.level === "monthly" && !goal.completed && onCreateRecurring && (
+                <button onClick={() => { setShowRecurPicker(prev => !prev); setRecurName(goal.text); }} style={{ fontSize: 10, background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "1px 6px", borderRadius: 8, cursor: "pointer", fontWeight: 500 }}>🔄 {recurTasks.length > 0 ? "Add Another" : "Make Recurring"}</button>
               )}
-              {recurCreated && <span style={{ fontSize: 10, background: "#dcfce7", color: "#16a34a", padding: "1px 6px", borderRadius: 8, fontWeight: 500 }}>✓ Recurring added</span>}
+              {recurTasks.length > 0 && <span style={{ fontSize: 10, background: "#dcfce7", color: "#16a34a", padding: "1px 6px", borderRadius: 8, fontWeight: 500 }}>✓ {recurTasks.length} recurring</span>}
             </div>
+
+            {/* List of created recurring tasks */}
+            {recurTasks.length > 0 && (
+              <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                {recurTasks.map((rt, idx) => {
+                  const rtCat = CATEGORIES.find(c => c.value === rt.category) || CATEGORIES[0];
+                  const rtPri = PRIORITY_META.find(p => p.value === rt.priority) || PRIORITY_META[1];
+                  const scheduleDesc = rt.type === "daily" ? "Every day" : rt.type === "weekdays" ? "Mon–Fri" : rt.type === "weekly" ? (rt.days || []).map(d => DAY_NAMES[d]).join(", ") : "";
+                  return (
+                    <div key={idx} style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 6, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 11, color: "#374151", fontWeight: 500, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>🔄 {rt.text}</span>
+                      <span style={{ fontSize: 9, background: "#e0e7ff", color: "#4338ca", padding: "1px 5px", borderRadius: 6 }}>{scheduleDesc}</span>
+                      <span style={{ fontSize: 9, background: rtPri.bg, color: rtPri.color, padding: "1px 5px", borderRadius: 6 }}>{rtPri.icon}</span>
+                      <span style={{ fontSize: 9, background: rtCat.bg, color: rtCat.color, padding: "1px 5px", borderRadius: 6 }}>{rtCat.icon}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Recurring task picker for monthly goals */}
             {showRecurPicker && goal.level === "monthly" && (
-              <div style={{ marginTop: 8, background: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: 8, padding: 10 }}>
-                <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: "#7c3aed" }}>Create recurring task from this goal</p>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 3 }}>Schedule</label>
-                    <select value={recurType} onChange={e => setRecurType(e.target.value)} style={{ fontSize: 11, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 6px" }}>
+              <div style={{ marginTop: 8, background: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: 10, padding: 12 }}>
+                <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 600, color: "#7c3aed" }}>🔄 Create Recurring Task</p>
+
+                {/* Task name */}
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Task Name</label>
+                  <input value={recurName} onChange={e => setRecurName(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", background: "white" }} placeholder="What should the daily/weekly task say?" />
+                </div>
+
+                {/* Priority */}
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Priority</label>
+                  <PriorityPicker value={recurPriority} onChange={setRecurPriority} />
+                </div>
+
+                {/* Schedule + Category row */}
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+                  <div style={{ flex: 1, minWidth: 120 }}>
+                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Schedule</label>
+                    <select value={recurType} onChange={e => setRecurType(e.target.value)} style={{ width: "100%", fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 8px", background: "white" }}>
                       <option value="daily">Every day</option>
-                      <option value="weekdays">Weekdays (Mon-Fri)</option>
+                      <option value="weekdays">Weekdays (Mon–Fri)</option>
                       <option value="weekly">Weekly (pick days)</option>
                     </select>
                   </div>
-                  <div>
-                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 3 }}>Category</label>
-                    <select value={recurCategory} onChange={e => setRecurCategory(e.target.value)} style={{ fontSize: 11, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 6px" }}>
+                  <div style={{ flex: 1, minWidth: 120 }}>
+                    <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Category</label>
+                    <select value={recurCategory} onChange={e => setRecurCategory(e.target.value)} style={{ width: "100%", fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6, padding: "6px 8px", background: "white" }}>
                       {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
                     </select>
                   </div>
                 </div>
+
+                {/* Weekly day picker */}
                 {recurType === "weekly" && (
-                  <div style={{ marginBottom: 8 }}>
+                  <div style={{ marginBottom: 10 }}>
                     <label style={{ fontSize: 10, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Pick days</label>
-                    <div style={{ display: "flex", gap: 3 }}>
+                    <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                       {DAY_NAMES.map((name, i) => (
-                        <button key={i} className={`day-chip ${recurDays.includes(i) ? "active" : ""}`} onClick={() => setRecurDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i].sort())} style={{ width: 28, height: 24, fontSize: 10 }}>{name}</button>
+                        <button key={i} className={`day-chip ${recurDays.includes(i) ? "active" : ""}`} onClick={() => setRecurDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i].sort())}>{name}</button>
                       ))}
                     </div>
                   </div>
                 )}
-                <div style={{ display: "flex", gap: 6 }}>
+
+                {/* Preview */}
+                <div style={{ background: "white", border: "1px solid #e9d5ff", borderRadius: 6, padding: "8px 10px", marginBottom: 10 }}>
+                  <p style={{ margin: 0, fontSize: 10, color: "#9ca3af", fontWeight: 600, marginBottom: 4 }}>Preview</p>
+                  <p style={{ margin: 0, fontSize: 12, color: "#374151" }}>
+                    <strong>{recurName || "..."}</strong>
+                    {" — "}
+                    <span style={{ color: (PRIORITY_META.find(p => p.value === recurPriority) || {}).color }}>{(PRIORITY_META.find(p => p.value === recurPriority) || {}).icon} {recurPriority}</span>
+                    {" · "}
+                    <span>{(CATEGORIES.find(c => c.value === recurCategory) || {}).icon} {(CATEGORIES.find(c => c.value === recurCategory) || {}).label}</span>
+                    {" · "}
+                    <span style={{ color: "#4338ca" }}>{recurType === "daily" ? "Every day" : recurType === "weekdays" ? "Mon–Fri" : recurDays.map(d => DAY_NAMES[d]).join(", ") || "Pick days"}</span>
+                  </p>
+                </div>
+
+                {/* Buttons */}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   <button onClick={() => {
-                    onCreateRecurring({
+                    if (!recurName.trim()) return;
+                    const rule = {
                       id: generateId(),
-                      text: goal.text,
+                      text: recurName.trim(),
                       type: recurType,
                       days: recurType === "weekly" ? recurDays : [],
                       monthDays: [],
-                      priority: "medium",
+                      priority: recurPriority,
                       category: recurCategory,
                       enabled: true,
-                    });
+                    };
+                    onCreateRecurring(rule);
+                    setRecurTasks(prev => [...prev, rule]);
                     setShowRecurPicker(false);
-                    setRecurCreated(true);
-                  }} style={{ background: "#7c3aed", color: "white", border: "none", padding: "5px 12px", borderRadius: 6, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>Create Recurring Task</button>
-                  <button onClick={() => setShowRecurPicker(false)} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "5px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Cancel</button>
+                    setRecurName(goal.text);
+                    setRecurPriority("medium");
+                    setRecurType("daily");
+                    setRecurDays([1]);
+                    setRecurCategory("work");
+                  }} style={{ background: "#7c3aed", color: "white", border: "none", padding: "7px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>✓ Add to Tasks</button>
+                  <button onClick={() => setShowRecurPicker(false)} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "7px 14px", borderRadius: 8, fontSize: 12, cursor: "pointer" }}>Cancel</button>
                 </div>
               </div>
             )}
