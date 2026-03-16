@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Tasks & Goals</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .drag-handle { cursor: grab; color: #c0c0c0; user-select: none; font-size: 16px; line-height: 1; padding: 2px 4px; transition: color 0.15s; }
+  .drag-handle:hover { color: #888; }
+  .drag-handle:active { cursor: grabbing; }
+  .task-card { transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s; }
+  .task-card.dragging { opacity: 0.4; transform: scale(0.97); }
+  .task-card.drag-over-top { box-shadow: 0 -3px 0 0 #3b82f6 !important; }
+  .task-card.drag-over-bottom { box-shadow: 0 3px 0 0 #3b82f6 !important; }
+  .pri-btn { border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; opacity: 0.4; }
+  .pri-btn:hover { opacity: 0.8; }
+  .pri-btn.active { opacity: 1; transform: scale(1.08); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+  .pri-flag { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid; cursor: pointer; font-size: 12px; transition: all 0.15s; }
+  .pri-flag:hover { transform: scale(1.15); }
+  .day-chip { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 26px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid #d1d5db; background: white; color: #6b7280; transition: all 0.15s; }
+  .day-chip:hover { border-color: #3b82f6; color: #3b82f6; }
+  .day-chip.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+  .day-chip.monthly { width: auto; padding: 0 8px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal-box { background: white; border-radius: 14px; padding: 24px; width: 480px; max-width: 90vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .sync-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+</style>
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  FIREBASE CONFIGURATION — Replace the values below with yours  ║
+// ║  See setup guide: task-manager-setup-guide.md                   ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBXxo2hiJB8wrkM7j41gTVB41ZQDOwxn4w",
+  authDomain: "my-tasks-d5f8c.firebaseapp.com",
+  databaseURL: "https://my-tasks-d5f8c-default-rtdb.firebaseio.com",
+  projectId: "my-tasks-d5f8c",
+  storageBucket: "my-tasks-d5f8c.firebasestorage.app",
+  messagingSenderId: "42524545840",
+  appId: "1:42524545840:web:2184008a1bea43b7bcaef5"
+};
+
+// Initialize Firebase (only if configured)
+let firebaseApp = null;
+let firebaseDb = null;
+let firebaseAuth = null;
+const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY_HERE";
+
+if (FIREBASE_CONFIGURED) {
+  try {
+    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+    firebaseDb = firebase.database();
+    firebaseAuth = firebase.auth();
+  } catch (e) {
+    console.warn("Firebase init failed:", e);
+  }
+}
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+const CATEGORIES = [
+  { value: "work", label: "Work", color: "#3b82f6", bg: "#eff6ff", icon: "💼" },
+  { value: "personal", label: "Personal", color: "#8b5cf6", bg: "#f5f3ff", icon: "👤" },
+  { value: "home", label: "Home", color: "#f97316", bg: "#fff7ed", icon: "🏠" },
+  { value: "career", label: "Career Dev", color: "#0891b2", bg: "#ecfeff", icon: "🚀" },
+  { value: "others", label: "Others", color: "#6b7280", bg: "#f9fafb", icon: "📌" },
+];
+
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+const PRIORITY_COLORS = {
+  high: { bg: "#fef2f2", border: "#fca5a5", badge: "#ef4444" },
+  medium: { bg: "#fffbeb", border: "#fcd34d", badge: "#f59e0b" },
+  low: { bg: "#f0fdf4", border: "#86efac", badge: "#22c55e" },
+};
+
+const STORAGE_KEY = "taskmanager_tasks_v3";
+const GOALS_STORAGE_KEY = "taskmanager_goals_v1";
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function daysSince(dateStr) {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+}
+
+function scoreTask(task) {
+  let score = 0;
+  score += (2 - PRIORITY_ORDER[task.priority]) * 40;
+  if (task.dueDate) {
+    const daysUntilDue = Math.floor((new Date(task.dueDate) - Date.now()) / 86400000);
+    if (daysUntilDue < 0) score += 100;
+    else if (daysUntilDue <= 1) score += 60;
+    else if (daysUntilDue <= 3) score += 30;
+    else if (daysUntilDue <= 7) score += 10;
+  }
+  score += Math.min(daysSince(task.createdAt), 14) * 2;
+  return score;
+}
+
+function loadTasks() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [
+    { id: generateId(), text: "Review quarterly report", priority: "high", category: "work", dueDate: "2026-03-18", completed: false, createdAt: "2026-03-14" },
+    { id: generateId(), text: "Prepare team sync agenda", priority: "medium", category: "work", dueDate: "2026-03-17", completed: false, createdAt: "2026-03-15" },
+    { id: generateId(), text: "Buy groceries", priority: "medium", category: "home", dueDate: "", completed: false, createdAt: "2026-03-15" },
+    { id: generateId(), text: "Schedule dentist appointment", priority: "low", category: "personal", dueDate: "", completed: false, createdAt: "2026-03-10" },
+  ];
+}
+
+// ── Firebase data layer ──
+function useFirebaseSync(user) {
+  const [syncStatus, setSyncStatus] = useState("offline"); // offline | syncing | synced | error
+  const listenerRef = useRef(null);
+
+  const getUserRef = (path) => {
+    if (!firebaseDb || !user) return null;
+    return firebaseDb.ref(`users/${user.uid}/${path}`);
+  };
+
+  const saveToCloud = useCallback((path, data) => {
+    const ref = getUserRef(path);
+    if (!ref) return;
+    setSyncStatus("syncing");
+    ref.set(data).then(() => setSyncStatus("synced")).catch(() => setSyncStatus("error"));
+  }, [user]);
+
+  const listenToCloud = useCallback((path, callback) => {
+    const ref = getUserRef(path);
+    if (!ref) return () => {};
+    const handler = ref.on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data !== null) {
+        callback(data);
+        setSyncStatus("synced");
+      }
+    }, () => setSyncStatus("error"));
+    return () => ref.off("value", handler);
+  }, [user]);
+
+  useEffect(() => {
+    if (user) setSyncStatus("synced");
+    else setSyncStatus("offline");
+  }, [user]);
+
+  return { syncStatus, saveToCloud, listenToCloud };
+}
+
+// ── Recurring tasks ──
+const RECUR_STORAGE_KEY = "taskmanager_recurring_v1";
+const RECUR_LOG_KEY = "taskmanager_recur_log_v1";
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const RECUR_TYPES = [
+  { value: "weekly", label: "Weekly (pick days)" },
+  { value: "daily", label: "Every day" },
+  { value: "weekdays", label: "Weekdays (Mon-Fri)" },
+  { value: "monthly", label: "Monthly (pick date)" },
+];
+
+function loadRecurringRules() {
+  try {
+    const saved = localStorage.getItem(RECUR_STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [];
+}
+
+function saveRecurringRules(rules) {
+  try { localStorage.setItem(RECUR_STORAGE_KEY, JSON.stringify(rules)); } catch(e) {}
+}
+
+function loadRecurLog() {
+  try {
+    const saved = localStorage.getItem(RECUR_LOG_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return {};
+}
+
+function saveRecurLog(log) {
+  try { localStorage.setItem(RECUR_LOG_KEY, JSON.stringify(log)); } catch(e) {}
+}
+
+function todayStr() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function shouldSpawnToday(rule) {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const dayOfMonth = now.getDate();
+  if (!rule.enabled) return false;
+  if (rule.type === "daily") return true;
+  if (rule.type === "weekdays") return dayOfWeek >= 1 && dayOfWeek <= 5;
+  if (rule.type === "weekly") return (rule.days || []).includes(dayOfWeek);
+  if (rule.type === "monthly") return (rule.monthDays || []).includes(dayOfMonth);
+  return false;
+}
+
+function spawnRecurringTasks(rules, existingTasks) {
+  const today = todayStr();
+  const log = loadRecurLog();
+  const newTasks = [];
+  rules.forEach(rule => {
+    if (!shouldSpawnToday(rule)) return;
+    const logKey = rule.id + "_" + today;
+    if (log[logKey]) return;
+    newTasks.push({
+      id: generateId(),
+      text: rule.text,
+      priority: rule.priority,
+      category: rule.category,
+      dueDate: today,
+      completed: false,
+      createdAt: today,
+      recurringRuleId: rule.id,
+    });
+    log[logKey] = true;
+  });
+  saveRecurLog(log);
+  return newTasks;
+}
+
+// ── Auth bar ──
+function AuthBar({ user, syncStatus, onSignIn, onSignOut }) {
+  const statusColors = { offline: "#9ca3af", syncing: "#f59e0b", synced: "#22c55e", error: "#ef4444" };
+  const statusLabels = { offline: "Local only", syncing: "Syncing...", synced: "Synced", error: "Sync error" };
+
+  if (!FIREBASE_CONFIGURED) {
+    return (
+      <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#92400e" }}>
+        ☁️ <strong>Cloud sync available!</strong> Add your Firebase config to enable cross-device sync. See the setup guide for instructions.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, background: "white", borderRadius: 10, padding: "8px 14px", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+      {user ? (
+        <>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {user.photoURL && <img src={user.photoURL} alt="" style={{ width: 24, height: 24, borderRadius: "50%" }} />}
+            <span style={{ fontSize: 12, color: "#374151" }}>{user.displayName || user.email}</span>
+            <span className="sync-badge" style={{ background: statusColors[syncStatus] + "20", color: statusColors[syncStatus] }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColors[syncStatus], display: "inline-block" }}></span>
+              {statusLabels[syncStatus]}
+            </span>
+          </div>
+          <button onClick={onSignOut} style={{ fontSize: 11, color: "#9ca3af", border: "1px solid #e5e7eb", background: "white", padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}>Sign out</button>
+        </>
+      ) : (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <span style={{ fontSize: 12, color: "#6b7280" }}>☁️ Sign in to sync tasks across devices</span>
+          <button onClick={onSignIn} style={{ fontSize: 12, background: "white", border: "1px solid #d1d5db", padding: "5px 14px", borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500, color: "#374151" }}>
+            <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Sign in with Google
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Recurring Modal ──
+function RecurringModal({ show, onClose, rules, onSave }) {
+  const [localRules, setLocalRules] = useState(rules);
+  const [adding, setAdding] = useState(false);
+  const [newText, setNewText] = useState("");
+  const [newType, setNewType] = useState("weekly");
+  const [newDays, setNewDays] = useState([1]);
+  const [newMonthDays, setNewMonthDays] = useState([1]);
+  const [newPriority, setNewPriority] = useState("medium");
+  const [newCategory, setNewCategory] = useState("work");
+
+  useEffect(() => { setLocalRules(rules); }, [rules]);
+
+  if (!show) return null;
+
+  const toggleDay = (d) => setNewDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort());
+  const toggleMonthDay = (d) => setNewMonthDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort());
+
+  const addRule = () => {
+    if (!newText.trim()) return;
+    const rule = { id: generateId(), text: newText.trim(), type: newType, days: newType === "weekly" ? newDays : [], monthDays: newType === "monthly" ? newMonthDays : [], priority: newPriority, category: newCategory, enabled: true };
+    const updated = [...localRules, rule];
+    setLocalRules(updated);
+    onSave(updated);
+    setNewText(""); setNewDays([1]); setNewMonthDays([1]); setAdding(false);
+  };
+
+  const toggleEnabled = (id) => { const updated = localRules.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r); setLocalRules(updated); onSave(updated); };
+  const deleteRule = (id) => { const updated = localRules.filter(r => r.id !== id); setLocalRules(updated); onSave(updated); };
+
+  const describeSchedule = (rule) => {
+    if (rule.type === "daily") return "Every day";
+    if (rule.type === "weekdays") return "Mon - Fri";
+    if (rule.type === "weekly") return (rule.days || []).map(d => DAY_NAMES[d]).join(", ");
+    if (rule.type === "monthly") return "Monthly on " + (rule.monthDays || []).map(d => d + getSuffix(d)).join(", ");
+    return "";
+  };
+
+  const getSuffix = (n) => { if (n >= 11 && n <= 13) return "th"; if (n % 10 === 1) return "st"; if (n % 10 === 2) return "nd"; if (n % 10 === 3) return "rd"; return "th"; };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1f2937" }}>Recurring Tasks</h2>
+          <button onClick={onClose} style={{ border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#9ca3af" }}>✕</button>
+        </div>
+        <p style={{ fontSize: 12, color: "#6b7280", marginTop: 0, marginBottom: 16 }}>Set up tasks that automatically appear on specific days. They'll be created fresh each time the page loads on a scheduled day.</p>
+
+        {localRules.length === 0 && !adding && (
+          <div style={{ textAlign: "center", padding: "24px 0", color: "#9ca3af" }}><p style={{ fontSize: 24, marginBottom: 4 }}>🔄</p><p style={{ fontSize: 13 }}>No recurring tasks yet</p></div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+          {localRules.map(rule => {
+            const pMeta = PRIORITY_META.find(p => p.value === rule.priority) || PRIORITY_META[1];
+            return (
+              <div key={rule.id} style={{ background: rule.enabled ? "#f9fafb" : "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: 10, padding: 12, opacity: rule.enabled ? 1 : 0.6 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#1f2937" }}>{rule.text}</p>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 10, background: "#e0e7ff", color: "#4338ca", padding: "1px 6px", borderRadius: 8 }}>🔄 {describeSchedule(rule)}</span>
+                      <span style={{ fontSize: 10, background: pMeta.bg, color: pMeta.color, padding: "1px 6px", borderRadius: 8 }}>{pMeta.icon} {pMeta.label}</span>
+                      <CategoryBadge category={rule.category} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <button onClick={() => toggleEnabled(rule.id)} style={{ fontSize: 11, background: rule.enabled ? "#dcfce7" : "#fee2e2", color: rule.enabled ? "#16a34a" : "#dc2626", border: "none", padding: "3px 8px", borderRadius: 6, cursor: "pointer" }}>{rule.enabled ? "On" : "Off"}</button>
+                    <button onClick={() => deleteRule(rule.id)} style={{ fontSize: 13, color: "#9ca3af", border: "none", background: "none", cursor: "pointer" }}>✕</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {adding ? (
+          <div style={{ background: "#f0f9ff", border: "1px solid #bae6fd", borderRadius: 10, padding: 14 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 600, color: "#0c4a6e" }}>New recurring task</p>
+            <input autoFocus style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none", boxSizing: "border-box", marginBottom: 10 }} placeholder="Task name..." value={newText} onChange={e => setNewText(e.target.value)} onKeyDown={e => { if (e.key === "Enter") addRule(); }} />
+            <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+              <div>
+                <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Schedule</label>
+                <select value={newType} onChange={e => setNewType(e.target.value)} style={{ fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px" }}>{RECUR_TYPES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}</select>
+              </div>
+              <div>
+                <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 4 }}>Category</label>
+                <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px" }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+              </div>
+            </div>
+            {newType === "weekly" && (
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Pick days</label>
+                <div style={{ display: "flex", gap: 4 }}>{DAY_NAMES.map((name, i) => (<button key={i} className={`day-chip ${newDays.includes(i) ? "active" : ""}`} onClick={() => toggleDay(i)}>{name}</button>))}</div>
+              </div>
+            )}
+            {newType === "monthly" && (
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Pick date(s) of the month</label>
+                <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{Array.from({ length: 31 }, (_, i) => i + 1).map(d => (<button key={d} className={`day-chip monthly ${newMonthDays.includes(d) ? "active" : ""}`} onClick={() => toggleMonthDay(d)}>{d}</button>))}</div>
+              </div>
+            )}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600, display: "block", marginBottom: 6 }}>Priority</label>
+              <PriorityPicker value={newPriority} onChange={setNewPriority} />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={addRule} style={{ background: "#3b82f6", color: "white", border: "none", padding: "6px 16px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Save Rule</button>
+              <button onClick={() => setAdding(false)} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "6px 16px", borderRadius: 8, fontSize: 12, cursor: "pointer" }}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setAdding(true)} style={{ width: "100%", background: "#f0f9ff", color: "#2563eb", border: "1px dashed #93c5fd", padding: "10px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>+ Add Recurring Task</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CategoryBadge({ category }) {
+  const cat = CATEGORIES.find(c => c.value === category) || CATEGORIES[3];
+  return (<span style={{ background: cat.bg, color: cat.color, border: `1px solid ${cat.color}30`, fontSize: 11, padding: "1px 6px", borderRadius: 10, fontWeight: 500, whiteSpace: "nowrap" }}>{cat.icon} {cat.label}</span>);
+}
+
+function CategoryTabs({ active, onChange, counts }) {
+  return (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      <button onClick={() => onChange("all")} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid", background: active === "all" ? "#1f2937" : "white", color: active === "all" ? "white" : "#4b5563", borderColor: active === "all" ? "#1f2937" : "#e5e7eb" }}>All ({counts.all})</button>
+      {CATEGORIES.map(cat => (
+        <button key={cat.value} onClick={() => onChange(cat.value)} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: "pointer", border: "1px solid", background: active === cat.value ? cat.color : "white", color: active === cat.value ? "white" : cat.color, borderColor: active === cat.value ? cat.color : `${cat.color}40` }}>{cat.icon} {cat.label} ({counts[cat.value] || 0})</button>
+      ))}
+    </div>
+  );
+}
+
+const PRIORITY_META = [
+  { value: "high", label: "High", icon: "🔴", color: "#ef4444", bg: "#fef2f2" },
+  { value: "medium", label: "Medium", icon: "🟡", color: "#f59e0b", bg: "#fffbeb" },
+  { value: "low", label: "Low", icon: "🟢", color: "#22c55e", bg: "#f0fdf4" },
+];
+
+function PriorityPicker({ value, onChange, size }) {
+  const isSmall = size === "small";
+  return (
+    <div style={{ display: "flex", gap: isSmall ? 3 : 4, alignItems: "center" }}>
+      {PRIORITY_META.map(p => {
+        const isActive = value === p.value;
+        return (<button key={p.value} onClick={() => onChange(p.value)} title={`${p.label} priority`} className={`pri-btn ${isActive ? "active" : ""}`} style={{ background: isActive ? p.color : p.bg, color: isActive ? "white" : p.color, border: `1.5px solid ${isActive ? p.color : p.color + "50"}`, padding: isSmall ? "2px 7px" : "4px 10px", fontSize: isSmall ? 10 : 11 }}>{isSmall ? p.icon : `${p.icon} ${p.label}`}</button>);
+      })}
+    </div>
+  );
+}
+
+// ── Goals Panel ──
+const GOAL_TIMEFRAMES = [
+  { key: "20y", label: "20-Year Vision", icon: "🌟", color: "#7c3aed", bg: "#f5f3ff", desc: "Where do you see yourself in 20 years?" },
+  { key: "10y", label: "10-Year Goals", icon: "🎯", color: "#2563eb", bg: "#eff6ff", desc: "Major milestones for the next decade" },
+  { key: "5y", label: "5-Year Goals", icon: "🚀", color: "#0891b2", bg: "#ecfeff", desc: "Medium-term objectives to work toward" },
+  { key: "1y", label: "1-Year Goals", icon: "📅", color: "#059669", bg: "#ecfdf5", desc: "What to accomplish this year" },
+  { key: "monthly", label: "Monthly Goals", icon: "📋", color: "#d97706", bg: "#fffbeb", desc: "Focus areas for this month" },
+];
+
+function loadGoals() {
+  try {
+    const saved = localStorage.getItem(GOALS_STORAGE_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  const empty = {};
+  GOAL_TIMEFRAMES.forEach(t => { empty[t.key] = []; });
+  return empty;
+}
+
+function GoalItem({ goal, onToggle, onDelete, onEdit, color }) {
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(goal.text);
+
+  const handleSave = () => {
+    if (editText.trim()) onEdit(goal.id, editText.trim());
+    setEditing(false);
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 12px", background: goal.completed ? "#f9fafb" : "white", borderRadius: 8, border: "1px solid #e5e7eb", opacity: goal.completed ? 0.5 : 1, transition: "all 0.15s" }}>
+      <button onClick={() => onToggle(goal.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: goal.completed ? color : "#d1d5db", background: goal.completed ? color : "transparent", color: goal.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{goal.completed && "✓"}</button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {editing ? (
+          <input autoFocus style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px", fontSize: 13, outline: "none", boxSizing: "border-box" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
+        ) : (
+          <p style={{ margin: 0, fontSize: 13, color: goal.completed ? "#9ca3af" : "#1f2937", textDecoration: goal.completed ? "line-through" : "none", cursor: "pointer" }} onDoubleClick={() => { if (!goal.completed) { setEditText(goal.text); setEditing(true); } }}>{goal.text}</p>
+        )}
+        <p style={{ margin: "4px 0 0", fontSize: 11, color: "#9ca3af" }}>Added {new Date(goal.createdAt).toLocaleDateString()}</p>
+      </div>
+      <button onClick={() => onDelete(goal.id)} style={{ color: "#9ca3af", border: "none", background: "none", cursor: "pointer", padding: 2, fontSize: 14 }}>✕</button>
+    </div>
+  );
+}
+
+function GoalsPanel({ goals, onUpdate }) {
+  const [expandedSections, setExpandedSections] = useState(() => {
+    const init = {};
+    GOAL_TIMEFRAMES.forEach(t => { init[t.key] = true; });
+    return init;
+  });
+  const [inputValues, setInputValues] = useState(() => {
+    const init = {};
+    GOAL_TIMEFRAMES.forEach(t => { init[t.key] = ""; });
+    return init;
+  });
+
+  const toggleSection = (key) => setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const addGoal = (timeframe) => {
+    const text = (inputValues[timeframe] || "").trim();
+    if (!text) return;
+    const updated = { ...goals };
+    updated[timeframe] = [...(updated[timeframe] || []), { id: generateId(), text, completed: false, createdAt: new Date().toISOString().split("T")[0] }];
+    onUpdate(updated);
+    setInputValues(prev => ({ ...prev, [timeframe]: "" }));
+  };
+
+  const toggleGoal = (timeframe, goalId) => {
+    const updated = { ...goals };
+    updated[timeframe] = (updated[timeframe] || []).map(g => g.id === goalId ? { ...g, completed: !g.completed } : g);
+    onUpdate(updated);
+  };
+
+  const deleteGoal = (timeframe, goalId) => {
+    const updated = { ...goals };
+    updated[timeframe] = (updated[timeframe] || []).filter(g => g.id !== goalId);
+    onUpdate(updated);
+  };
+
+  const editGoal = (timeframe, goalId, newText) => {
+    const updated = { ...goals };
+    updated[timeframe] = (updated[timeframe] || []).map(g => g.id === goalId ? { ...g, text: newText } : g);
+    onUpdate(updated);
+  };
+
+  const totalGoals = GOAL_TIMEFRAMES.reduce((sum, t) => sum + (goals[t.key] || []).length, 0);
+  const completedGoals = GOAL_TIMEFRAMES.reduce((sum, t) => sum + (goals[t.key] || []).filter(g => g.completed).length, 0);
+
+  return (
+    <div>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>{totalGoals} goals · {completedGoals} completed · {totalGoals - completedGoals} active</p>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {GOAL_TIMEFRAMES.map(tf => {
+          const items = goals[tf.key] || [];
+          const completed = items.filter(g => g.completed).length;
+          const isExpanded = expandedSections[tf.key];
+          const progress = items.length > 0 ? Math.round((completed / items.length) * 100) : 0;
+
+          return (
+            <div key={tf.key} style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+              {/* Section header */}
+              <button onClick={() => toggleSection(tf.key)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: tf.bg, border: "none", borderBottom: isExpanded ? "1px solid #e5e7eb" : "none", cursor: "pointer", textAlign: "left" }}>
+                <span style={{ fontSize: 20 }}>{tf.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: tf.color }}>{tf.label}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "#9ca3af" }}>{tf.desc}</p>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span style={{ fontSize: 12, color: "#6b7280", fontWeight: 500 }}>{items.length > 0 ? `${completed}/${items.length}` : "—"}</span>
+                  {items.length > 0 && (
+                    <div style={{ width: 60, height: 4, background: "#e5e7eb", borderRadius: 2, marginTop: 4 }}>
+                      <div style={{ width: `${progress}%`, height: "100%", background: tf.color, borderRadius: 2, transition: "width 0.3s" }}></div>
+                    </div>
+                  )}
+                </div>
+                <span style={{ fontSize: 14, color: "#9ca3af", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▼</span>
+              </button>
+
+              {/* Section content */}
+              {isExpanded && (
+                <div style={{ padding: 12 }}>
+                  {/* Goal list */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: items.length > 0 ? 10 : 0 }}>
+                    {items.map(goal => (
+                      <GoalItem key={goal.id} goal={goal} color={tf.color} onToggle={(id) => toggleGoal(tf.key, id)} onDelete={(id) => deleteGoal(tf.key, id)} onEdit={(id, text) => editGoal(tf.key, id, text)} />
+                    ))}
+                  </div>
+
+                  {/* Add goal input */}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 12px", fontSize: 13, outline: "none" }} placeholder={`Add a ${tf.label.toLowerCase().replace(" goals", "").replace(" vision", "")} goal...`} value={inputValues[tf.key] || ""} onChange={e => setInputValues(prev => ({ ...prev, [tf.key]: e.target.value }))} onKeyDown={e => { if (e.key === "Enter") addGoal(tf.key); }} />
+                    <button onClick={() => addGoal(tf.key)} style={{ background: tf.color, color: "white", border: "none", padding: "8px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Add</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tips */}
+      <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 16, marginTop: 24 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 8, marginTop: 0 }}>Goal-setting tips</p>
+        <div style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.8 }}>
+          Start with your 20-year vision and work backwards. Break big dreams into 10-year and 5-year milestones, then define yearly targets. Monthly goals should be specific actions that move you toward your 1-year goals. Double-click to edit. Review regularly!
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging, dragOverPos, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, sortBy }) {
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(task.text);
+  const pColors = PRIORITY_COLORS[task.priority];
+  const cardRef = useRef(null);
+
+  const handleSave = () => { if (editText.trim()) onUpdate(task.id, { text: editText.trim() }); setEditing(false); };
+
+  let extraClass = "task-card";
+  if (isDragging) extraClass += " dragging";
+  if (dragOverPos === "top") extraClass += " drag-over-top";
+  if (dragOverPos === "bottom") extraClass += " drag-over-bottom";
+  const isManual = sortBy === "manual";
+
+  return (
+    <div ref={cardRef} className={extraClass} draggable={isManual && !task.completed}
+      onDragStart={(e) => { if (!isManual) return; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", task.id); onDragStart(task.id); }}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => { if (!isManual) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; const rect = cardRef.current.getBoundingClientRect(); onDragOver(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
+      onDragLeave={() => onDragLeave(task.id)}
+      onDrop={(e) => { e.preventDefault(); if (!isManual) return; const rect = cardRef.current.getBoundingClientRect(); onDrop(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
+      style={{ background: "white", borderLeft: `4px solid ${pColors.badge}`, opacity: task.completed ? 0.5 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
+      {isManual && !task.completed && <span className="drag-handle" title="Drag to reorder">⠿</span>}
+      <button onClick={() => onToggle(task.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: task.completed ? "#9ca3af" : "#d1d5db", background: task.completed ? "#9ca3af" : "transparent", color: task.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{task.completed && "✓"}</button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {editing ? (
+          <input autoFocus style={{ width: "100%", background: "white", border: "1px solid #d1d5db", borderRadius: 4, padding: "4px 8px", fontSize: 13, outline: "none" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
+        ) : (
+          <p style={{ fontSize: 13, cursor: "pointer", textDecoration: task.completed ? "line-through" : "none", color: task.completed ? "#9ca3af" : "#1f2937", margin: 0 }} onDoubleClick={() => { if (!task.completed) { setEditText(task.text); setEditing(true); } }}>
+            {isSuggested && !task.completed && <span style={{ color: "#3b82f6", fontWeight: 600, marginRight: 4 }}>★</span>}{task.text}
+          </p>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+          <span style={{ background: pColors.badge, color: "white", fontSize: 10, padding: "1px 6px", borderRadius: 4 }}>{task.priority}</span>
+          <CategoryBadge category={task.category} />
+          {task.dueDate && <span style={{ fontSize: 11, color: new Date(task.dueDate) < Date.now() && !task.completed ? "#dc2626" : "#6b7280", fontWeight: new Date(task.dueDate) < Date.now() && !task.completed ? 600 : 400 }}>Due: {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}</span>}
+          {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", border: "1px solid #c4b5fd40", padding: "1px 5px", borderRadius: 8 }}>🔄 recurring</span>}
+          <span style={{ fontSize: 11, color: "#9ca3af" }}>{daysSince(task.createdAt)}d ago</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+        <PriorityPicker value={task.priority} onChange={p => onUpdate(task.id, { priority: p })} size="small" />
+        <select style={{ fontSize: 11, background: "transparent", border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 4px" }} value={task.category} onChange={e => onUpdate(task.id, { category: e.target.value })}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+        <input type="date" style={{ fontSize: 11, background: "transparent", border: "1px solid #e5e7eb", borderRadius: 4, padding: "2px 4px", width: 115 }} value={task.dueDate || ""} onChange={e => onUpdate(task.id, { dueDate: e.target.value })} />
+        <button onClick={() => onDelete(task.id)} style={{ color: "#9ca3af", border: "none", background: "none", cursor: "pointer", padding: 2, marginLeft: 4 }}>✕</button>
+      </div>
+    </div>
+  );
+}
+
+function TaskManager() {
+  const [tasks, setTasks] = useState(loadTasks);
+  const [input, setInput] = useState("");
+  const [sortBy, setSortBy] = useState("manual");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [suggestionList, setSuggestionList] = useState([]);
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [newCategory, setNewCategory] = useState("work");
+  const [newPriority, setNewPriority] = useState("medium");
+  const [dragId, setDragId] = useState(null);
+  const [dragOverState, setDragOverState] = useState({});
+  const [recurringRules, setRecurringRules] = useState(loadRecurringRules);
+  const [showRecurring, setShowRecurring] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(FIREBASE_CONFIGURED);
+  const [activeTab, setActiveTab] = useState("tasks");
+  const [goals, setGoals] = useState(loadGoals);
+  const inputRef = useRef(null);
+  const spawnedRef = useRef(false);
+  const cloudWriteRef = useRef(false); // prevent echo writes
+  const goalsCloudWriteRef = useRef(false);
+
+  const { syncStatus, saveToCloud, listenToCloud } = useFirebaseSync(user);
+
+  // Auth listener
+  useEffect(() => {
+    if (!firebaseAuth) { setAuthLoading(false); return; }
+    const unsub = firebaseAuth.onAuthStateChanged((u) => {
+      setUser(u);
+      setAuthLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  // Listen to cloud data when signed in
+  useEffect(() => {
+    if (!user) return;
+    const unsub1 = listenToCloud("tasks", (data) => {
+      const arr = Array.isArray(data) ? data : Object.values(data || {});
+      if (arr.length > 0) {
+        cloudWriteRef.current = true;
+        setTasks(arr);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e) {}
+      }
+    });
+    const unsub2 = listenToCloud("recurringRules", (data) => {
+      const arr = Array.isArray(data) ? data : Object.values(data || {});
+      cloudWriteRef.current = true;
+      setRecurringRules(arr);
+      saveRecurringRules(arr);
+    });
+    const unsub3 = listenToCloud("goals", (data) => {
+      if (data && typeof data === "object") {
+        goalsCloudWriteRef.current = true;
+        setGoals(data);
+        try { localStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+      }
+    });
+    return () => { unsub1(); unsub2(); unsub3(); };
+  }, [user, listenToCloud]);
+
+  // Save to localStorage + cloud
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch(e) {}
+    if (user && !cloudWriteRef.current) {
+      saveToCloud("tasks", tasks);
+    }
+    cloudWriteRef.current = false;
+  }, [tasks]);
+
+  // Save goals to localStorage + cloud
+  useEffect(() => {
+    try { localStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(goals)); } catch(e) {}
+    if (user && !goalsCloudWriteRef.current) {
+      saveToCloud("goals", goals);
+    }
+    goalsCloudWriteRef.current = false;
+  }, [goals]);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Spawn recurring tasks on load
+  useEffect(() => {
+    if (spawnedRef.current) return;
+    spawnedRef.current = true;
+    const spawned = spawnRecurringTasks(recurringRules, tasks);
+    if (spawned.length > 0) setTasks(prev => [...prev, ...spawned]);
+  }, []);
+
+  const handleSaveRules = (updated) => {
+    setRecurringRules(updated);
+    saveRecurringRules(updated);
+    if (user) saveToCloud("recurringRules", updated);
+  };
+
+  const signIn = async () => {
+    if (!firebaseAuth) return;
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await firebaseAuth.signInWithPopup(provider);
+    } catch (e) { console.error("Sign in failed:", e); }
+  };
+
+  const signOut = async () => {
+    if (!firebaseAuth) return;
+    await firebaseAuth.signOut();
+  };
+
+  const addTask = () => {
+    const text = input.trim();
+    if (!text) return;
+    let priority = newPriority;
+    let cleanText = text;
+    if (/^!!\s*/.test(text)) { priority = "high"; cleanText = text.replace(/^!!\s*/, ""); }
+    else if (/^!\s*/.test(text)) { priority = "medium"; cleanText = text.replace(/^!\s*/, ""); }
+    else if (/^~\s*/.test(text)) { priority = "low"; cleanText = text.replace(/^~\s*/, ""); }
+    setTasks(prev => [...prev, { id: generateId(), text: cleanText, priority, category: newCategory, dueDate: "", completed: false, createdAt: new Date().toISOString().split("T")[0] }]);
+    setInput("");
+  };
+
+  const toggleTask = (id) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const deleteTask = (id) => setTasks(prev => prev.filter(t => t.id !== id));
+  const updateTask = (id, updates) => setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+
+  const handleDragStart = useCallback((id) => setDragId(id), []);
+  const handleDragEnd = useCallback(() => { setDragId(null); setDragOverState({}); }, []);
+  const handleDragOver = useCallback((id, pos) => { setDragOverState(prev => (prev.id === id && prev.pos === pos) ? prev : { id, pos }); }, []);
+  const handleDragLeave = useCallback((id) => { setDragOverState(prev => prev.id === id ? {} : prev); }, []);
+  const handleDrop = useCallback((targetId, pos) => {
+    if (!dragId || dragId === targetId) { setDragId(null); setDragOverState({}); return; }
+    setTasks(prev => { const copy = [...prev]; const fromIdx = copy.findIndex(t => t.id === dragId); if (fromIdx < 0) return prev; const [moved] = copy.splice(fromIdx, 1); let toIdx = copy.findIndex(t => t.id === targetId); if (toIdx < 0) return prev; if (pos === "bottom") toIdx += 1; copy.splice(toIdx, 0, moved); return copy; });
+    setDragId(null); setDragOverState({});
+  }, [dragId]);
+
+  const currentSuggestion = suggestionList.length > 0 ? suggestionList[suggestionIndex] : null;
+
+  const suggestNext = () => {
+    let pending = tasks.filter(t => !t.completed);
+    if (filterCategory !== "all") pending = pending.filter(t => t.category === filterCategory);
+    if (!pending.length) { setSuggestionList([]); setSuggestionIndex(0); return; }
+    const scored = pending.map(t => ({ id: t.id, score: scoreTask(t) })).sort((a, b) => b.score - a.score);
+    setSuggestionList(scored); setSuggestionIndex(0);
+  };
+  const skipSuggestion = () => { if (suggestionIndex < suggestionList.length - 1) setSuggestionIndex(prev => prev + 1); };
+  const dismissSuggestions = () => { setSuggestionList([]); setSuggestionIndex(0); };
+
+  const getSortedTasks = () => {
+    let filtered = [...tasks];
+    if (filterCategory !== "all") filtered = filtered.filter(t => t.category === filterCategory);
+    if (filterPriority !== "all") filtered = filtered.filter(t => t.priority === filterPriority);
+    if (!showCompleted) filtered = filtered.filter(t => !t.completed);
+    if (sortBy === "priority") filtered.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+    else if (sortBy === "dueDate") filtered.sort((a, b) => { if (!a.dueDate && !b.dueDate) return 0; if (!a.dueDate) return 1; if (!b.dueDate) return -1; return new Date(a.dueDate) - new Date(b.dueDate); });
+    else if (sortBy === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    else if (sortBy === "oldest") filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    else if (sortBy === "smart") filtered.sort((a, b) => scoreTask(b) - scoreTask(a));
+    else if (sortBy === "category") filtered.sort((a, b) => a.category.localeCompare(b.category));
+    return filtered;
+  };
+
+  const pendingCount = tasks.filter(t => !t.completed).length;
+  const completedCount = tasks.filter(t => t.completed).length;
+  const categoryCounts = { all: pendingCount };
+  CATEGORIES.forEach(c => { categoryCounts[c.value] = tasks.filter(t => !t.completed && t.category === c.value).length; });
+  const sorted = getSortedTasks();
+
+  if (authLoading) {
+    return (<div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f8fafc, #eff6ff)" }}><p style={{ color: "#6b7280" }}>Loading...</p></div>);
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8fafc, #eff6ff)", padding: 16 }}>
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1f2937", margin: 0 }}>{activeTab === "tasks" ? "My Tasks" : "My Goals"}</h1>
+          {activeTab === "tasks" && <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>{pendingCount} pending · {completedCount} completed</p>}
+        </div>
+
+        {/* Tab switcher */}
+        <div style={{ display: "flex", gap: 0, marginBottom: 16, background: "#f1f5f9", borderRadius: 12, padding: 4 }}>
+          <button onClick={() => setActiveTab("tasks")} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.2s", background: activeTab === "tasks" ? "white" : "transparent", color: activeTab === "tasks" ? "#1f2937" : "#6b7280", boxShadow: activeTab === "tasks" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>📝 Tasks</button>
+          <button onClick={() => setActiveTab("goals")} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.2s", background: activeTab === "goals" ? "white" : "transparent", color: activeTab === "goals" ? "#1f2937" : "#6b7280", boxShadow: activeTab === "goals" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>🎯 Goals</button>
+        </div>
+
+        {/* Auth bar */}
+        <AuthBar user={user} syncStatus={syncStatus} onSignIn={signIn} onSignOut={signOut} />
+
+        {activeTab === "tasks" ? (
+        <>
+        {/* Category tabs */}
+        <div style={{ marginBottom: 16 }}><CategoryTabs active={filterCategory} onChange={setFilterCategory} counts={categoryCounts} /></div>
+
+        {/* Input */}
+        <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 12, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 12, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 8px", width: 110 }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+            <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 14px", fontSize: 13, outline: "none" }} placeholder="Type a task and press Enter..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") addTask(); }} />
+            <button onClick={addTask} style={{ background: "#3b82f6", color: "white", border: "none", padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>Add</button>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Priority:</span>
+            <PriorityPicker value={newPriority} onChange={setNewPriority} />
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Sort:</label>
+            <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "4px 8px" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <option value="manual">Manual (Drag)</option><option value="priority">Priority</option><option value="category">Category</option><option value="dueDate">Due Date</option><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="smart">Smart (Score)</option>
+            </select>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Priority:</label>
+            <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "4px 8px" }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
+              <option value="all">All</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+            </select>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#6b7280", cursor: "pointer" }}>
+            <input type="checkbox" checked={showCompleted} onChange={e => setShowCompleted(e.target.checked)} /> Show done
+          </label>
+          <button onClick={() => setShowRecurring(true)} style={{ marginLeft: "auto", background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
+          <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Suggest Next Task</button>
+        </div>
+
+        {sortBy === "manual" && sorted.length > 1 && (
+          <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#15803d", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 16 }}>⠿</span> Drag the handle to reorder tasks</div>
+        )}
+
+        {/* Suggestion banner */}
+        {currentSuggestion && (() => {
+          const suggestedTask = tasks.find(t => t.id === currentSuggestion.id);
+          if (!suggestedTask) return null;
+          const isLast = suggestionIndex >= suggestionList.length - 1;
+          return (
+            <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: 14, marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 11, color: "#6b8cce", fontWeight: 600 }}>Suggestion {suggestionIndex + 1} of {suggestionList.length}</span>
+                <span style={{ fontSize: 10, color: "#93aed4", background: "#dbeafe", padding: "2px 8px", borderRadius: 8 }}>Score: {currentSuggestion.score}</span>
+              </div>
+              <p style={{ fontSize: 14, color: "#1d4ed8", margin: 0, fontWeight: 500 }}>★ {suggestedTask.text}<span style={{ marginLeft: 8 }}><CategoryBadge category={suggestedTask.category} /></span></p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+                {!isLast && <button onClick={skipSuggestion} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Skip → Show Next</button>}
+                {isLast && suggestionList.length > 1 && <button onClick={() => setSuggestionIndex(0)} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>↻ Back to Top Pick</button>}
+                <button onClick={dismissSuggestions} style={{ background: "transparent", color: "#93c5fd", border: "1px solid #bfdbfe", padding: "5px 14px", borderRadius: 8, fontSize: 12, cursor: "pointer" }}>Dismiss</button>
+                {isLast && <span style={{ fontSize: 11, color: "#93aed4", marginLeft: 4 }}>No more suggestions</span>}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Task list */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {sorted.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "48px 0", color: "#9ca3af" }}><p style={{ fontSize: 28, marginBottom: 8 }}>🎯</p><p style={{ fontSize: 13 }}>No tasks here. Type something above to get started!</p></div>
+          ) : sorted.map((task, i) => (
+            <TaskItem key={task.id} task={task} onToggle={toggleTask} onDelete={deleteTask} onUpdate={updateTask} isSuggested={currentSuggestion && currentSuggestion.id === task.id} isDragging={dragId === task.id} dragOverPos={dragOverState.id === task.id ? dragOverState.pos : null} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} sortBy={sortBy} />
+          ))}
+        </div>
+
+        {/* Quick tips */}
+        <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 16, marginTop: 24 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", marginBottom: 8, marginTop: 0 }}>Quick tips</p>
+          <div style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.8 }}>
+            Click priority buttons (🔴 🟡 🟢) to set or change priority. Drag ⠿ to reorder (Manual mode). Use category tabs to filter. Double-click to edit. 🔄 Recurring for auto-repeating tasks. Sign in with Google to sync across all your devices.
+          </div>
+        </div>
+        </>
+        ) : (
+          <GoalsPanel goals={goals} onUpdate={setGoals} />
+        )}
+      </div>
+
+      <RecurringModal show={showRecurring} onClose={() => setShowRecurring(false)} rules={recurringRules} onSave={handleSaveRules} />
+    </div>
+  );
+}
+
+ReactDOM.render(<TaskManager />, document.getElementById("root"));
+</script>
+</body>
+</html>
