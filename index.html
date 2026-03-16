@@ -1469,7 +1469,7 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
   const isManual = sortBy === "manual";
 
   return (
-    <div ref={cardRef} className={extraClass} draggable={isManual && !task.completed}
+    <div id={`task-${task.id}`} ref={cardRef} className={extraClass} draggable={isManual && !task.completed}
       onDragStart={(e) => { if (!isManual) return; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", task.id); onDragStart(task.id); }}
       onDragEnd={onDragEnd}
       onDragOver={(e) => { if (!isManual) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; const rect = cardRef.current.getBoundingClientRect(); onDragOver(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
@@ -1815,7 +1815,7 @@ function TaskManager() {
                 <span style={{ fontSize: 11, color: "#6b8cce", fontWeight: 600 }}>Suggestion {suggestionIndex + 1} of {suggestionList.length}</span>
                 <span style={{ fontSize: 10, color: "#93aed4", background: "#dbeafe", padding: "2px 8px", borderRadius: 8 }}>Score: {currentSuggestion.score}</span>
               </div>
-              <p style={{ fontSize: 14, color: "#1d4ed8", margin: 0, fontWeight: 500 }}>★ {suggestedTask.text}<span style={{ marginLeft: 8 }}><CategoryBadge category={suggestedTask.category} /></span></p>
+              <p onClick={() => { const el = document.getElementById(`task-${suggestedTask.id}`); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #60a5fa, 0 0 12px rgba(96,165,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); } }} style={{ fontSize: 14, color: "#1d4ed8", margin: 0, fontWeight: 500, cursor: "pointer" }}>★ {suggestedTask.text}<span style={{ marginLeft: 8 }}><CategoryBadge category={suggestedTask.category} /></span> <span style={{ fontSize: 10, color: "#93aed4" }}>↓ tap to scroll</span></p>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
                 {!isLast && <button onClick={skipSuggestion} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Skip → Show Next</button>}
                 {isLast && suggestionList.length > 1 && <button onClick={() => setSuggestionIndex(0)} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>↻ Back to Top Pick</button>}
