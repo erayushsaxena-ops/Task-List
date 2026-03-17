@@ -574,7 +574,12 @@ function spawnRecurringTasks(rules, existingTasks) {
   rules.forEach(rule => {
     if (!shouldSpawnToday(rule)) return;
     const logKey = rule.id + "_" + today;
-    if (log[logKey]) return;
+    if (log[logKey]) {
+      // Cross-check: if dedup log says spawned but no matching task exists, re-spawn
+      const taskExists = existingTasks.some(t => t.recurringRuleId === rule.id && t.createdAt === today);
+      if (taskExists) return;
+      // Orphaned dedup entry — task was never actually created, allow re-spawn
+    }
     newTasks.push({
       id: generateId(),
       text: rule.text,
