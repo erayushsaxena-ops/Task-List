@@ -2692,7 +2692,7 @@ function TaskManager() {
   const [quoteText, setQuoteText] = useState("");
   const [quoteAuthor, setQuoteAuthor] = useState("");
   const [showTodaySection, setShowTodaySection] = useState(false);
-  const [quoteExpanded, setQuoteExpanded] = useState(false);
+  const [quoteExpanded, setQuoteExpanded] = useState(true);
   const [showInputExtras, setShowInputExtras] = useState(false);
   const inputRef = useRef(null);
 
@@ -3049,10 +3049,11 @@ function TaskManager() {
 
         {/* Today's Focus Section */}
         {(() => {
-          const todayTasks = sorted.filter(t => t.dueDate === todayDate || t.recurringRuleId);
+          const overdueTasks = sorted.filter(t => !t.completed && t.dueDate && t.dueDate < todayDate && !t.recurringRuleId);
+          const dueTodayTasks = sorted.filter(t => !t.completed && t.dueDate === todayDate && !t.recurringRuleId);
+          const recurringToday = sorted.filter(t => !t.completed && t.recurringRuleId);
+          const todayTasks = [...overdueTasks, ...dueTodayTasks, ...recurringToday];
           if (todayTasks.length === 0) return null;
-          const dueTodayTasks = sorted.filter(t => t.dueDate === todayDate && !t.recurringRuleId);
-          const recurringToday = sorted.filter(t => t.recurringRuleId);
           return (
             <div style={{ marginBottom: 16 }}>
               <button onClick={() => setShowTodaySection(prev => !prev)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(135deg, #fefce8, #fffbeb)", border: "1px solid #fcd34d", borderRadius: 10, padding: "10px 14px", cursor: "pointer", marginBottom: showTodaySection ? 8 : 0 }}>
@@ -3061,6 +3062,14 @@ function TaskManager() {
               </button>
               {showTodaySection && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingLeft: 4 }}>
+                  {overdueTasks.length > 0 && <p style={{ fontSize: 10, color: "#b91c1c", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>🚨 Overdue</p>}
+                  {overdueTasks.map(task => (
+                    <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #ef4444, 0 0 12px rgba(239,68,68,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "#fff5f5", border: "1px solid #fecaca", borderLeft: "3px solid #ef4444", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
+                      <span style={{ fontSize: 10, color: "#dc2626", fontWeight: 600 }}>{(() => { const days = Math.floor((new Date(todayDate + "T00:00:00") - new Date(task.dueDate + "T00:00:00")) / 86400000); return days === 1 ? "1d late" : `${days}d late`; })()}</span>
+                      <CategoryBadge category={task.category} />
+                    </div>
+                  ))}
                   {dueTodayTasks.length > 0 && <p style={{ fontSize: 10, color: "#b45309", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>📅 Due today</p>}
                   {dueTodayTasks.map(task => (
                     <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #fbbf24, 0 0 12px rgba(251,191,36,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: "1px solid #fde68a", borderLeft: "3px solid #f59e0b", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
