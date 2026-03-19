@@ -358,6 +358,949 @@ const DAILY_QUOTES = [
   { text: "Your work is going to fill a large part of your life. Make it meaningful.", author: "Steve Jobs" },
   { text: "Success is not about luck. It's about dedication and hard work.", author: "Unknown" },
   { text: "The only person blocking your success is you.", author: "Unknown" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "It's not always that we need to do more but rather that we need to focus on less.", author: "Nathan W. Morris" },
+  { text: "Until we can manage time, we can manage nothing else.", author: "Peter Drucker" },
+  { text: "Lost time is never found again.", author: "Benjamin Franklin" },
+  { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
+  { text: "Absorb what is useful, discard what is useless and add what is specifically your own.", author: "Bruce Lee" },
+  { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" },
+  { text: "You can do anything, but not everything.", author: "David Allen" },
+  { text: "The secret of getting things done is to act.", author: "Dante Alighieri" },
+  { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+  { text: "Done is better than perfect.", author: "Sheryl Sandberg" },
+  { text: "If you spend too much time thinking about a thing, you'll never get it done.", author: "Bruce Lee" },
+  { text: "Begin, be bold and venture to be wise.", author: "Horace" },
+  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
+  { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb" },
+  { text: "First things first.", author: "Stephen Covey" },
+  { text: "Think of many things; do one.", author: "Portuguese Proverb" },
+  { text: "Slow is smooth, and smooth is fast.", author: "Navy SEALs Saying" },
+  { text: "Efficiency is doing things right; effectiveness is doing the right things.", author: "Peter Drucker" },
+  { text: "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
+  { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
+  { text: "Rock bottom became the solid foundation on which I rebuilt my life.", author: "J.K. Rowling" },
+  { text: "The human capacity for burden is like bamboo — far more flexible than you'd ever believe at first glance.", author: "Jodi Picoult" },
+  { text: "I can be changed by what happens to me. But I refuse to be reduced by it.", author: "Maya Angelou" },
+  { text: "Out of suffering have emerged the strongest souls; the most massive characters are seared with scars.", author: "Khalil Gibran" },
+  { text: "Endurance is not just the ability to bear a hard thing, but to turn it into glory.", author: "William Barclay" },
+  { text: "The gem cannot be polished without friction, nor man perfected without trials.", author: "Danish Proverb" },
+  { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche" },
+  { text: "Do not pray for an easy life, pray for the strength to endure a difficult one.", author: "Bruce Lee" },
+  { text: "What doesn't kill me makes me stronger.", author: "Friedrich Nietzsche" },
+  { text: "Strength does not come from winning. Your struggles develop your strengths.", author: "Arnold Schwarzenegger" },
+  { text: "I am not what happened to me, I am what I choose to become.", author: "Carl Jung" },
+  { text: "The bravest sight in the world is to see a great man struggling against adversity.", author: "Seneca" },
+  { text: "Tough times never last, but tough people do.", author: "Robert H. Schuller" },
+  { text: "You never know how strong you are until being strong is your only choice.", author: "Bob Marley" },
+  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+  { text: "A bend in the road is not the end of the road unless you fail to make the turn.", author: "Helen Keller" },
+  { text: "Every adversity, every failure, every heartache carries with it the seed of an equal or greater benefit.", author: "Napoleon Hill" },
+  { text: "The darkest hour has only sixty minutes.", author: "Morris Mandel" },
+  { text: "Persistence is the twin sister of excellence.", author: "Marabel Morgan" },
+  { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+  { text: "The more that you read, the more things you will know.", author: "Dr. Seuss" },
+  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+  { text: "The beautiful thing about learning is that nobody can take it away from you.", author: "B.B. King" },
+  { text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.", author: "Benjamin Franklin" },
+  { text: "Learning never exhausts the mind.", author: "Leonardo da Vinci" },
+  { text: "In learning you will teach, and in teaching you will learn.", author: "Phil Collins" },
+  { text: "The more I read, the more I acquire, the more certain I am that I know nothing.", author: "Voltaire" },
+  { text: "Anyone who stops learning is old, whether at twenty or eighty.", author: "Henry Ford" },
+  { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
+  { text: "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.", author: "Brian Herbert" },
+  { text: "Mistakes are the portals of discovery.", author: "James Joyce" },
+  { text: "Every expert was once a beginner.", author: "Helen Hayes" },
+  { text: "Develop a passion for learning. If you do, you will never cease to grow.", author: "Anthony J. D'Angelo" },
+  { text: "The wisest mind has something yet to learn.", author: "George Santayana" },
+  { text: "We learn more by looking for the answer to a question and not finding it than we do from learning the answer itself.", author: "Lloyd Alexander" },
+  { text: "Intellectual growth should commence at birth and cease only at death.", author: "Albert Einstein" },
+  { text: "All progress depends on the unreasonable man.", author: "George Bernard Shaw" },
+  { text: "The mind once stretched by a new idea never returns to its original dimensions.", author: "Ralph Waldo Emerson" },
+  { text: "Change is the end result of all true learning.", author: "Leo Buscaglia" },
+  { text: "We are what we repeatedly do.", author: "Aristotle" },
+  { text: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
+  { text: "Without self-discipline, success is impossible.", author: "Lou Holtz" },
+  { text: "The first and best victory is to conquer self.", author: "Plato" },
+  { text: "Motivation gets you started. Habit keeps you going.", author: "Jim Ryun" },
+  { text: "Your daily behavior reveals your deepest values.", author: "Robin Sharma" },
+  { text: "It's easier to resist at the beginning than at the end.", author: "Leonardo da Vinci" },
+  { text: "Good habits are worth being fanatical about.", author: "John Irving" },
+  { text: "You'll never change your life until you change something you do daily.", author: "John C. Maxwell" },
+  { text: "An ounce of practice is worth more than tons of preaching.", author: "Mahatma Gandhi" },
+  { text: "Success is nothing more than a few simple disciplines, practiced every day.", author: "Jim Rohn" },
+  { text: "The chains of habit are too light to be felt until they are too heavy to be broken.", author: "Samuel Johnson" },
+  { text: "Character is the result of two things: mental attitude and the way we spend our time.", author: "Elbert Hubbard" },
+  { text: "Small disciplines repeated with consistency every day lead to great achievements gained slowly over time.", author: "John C. Maxwell" },
+  { text: "Mastery is not a function of genius or talent. It's a function of time and intense focus.", author: "Robert Greene" },
+  { text: "Men's natures are alike, it is their habits that carry them far apart.", author: "Confucius" },
+  { text: "Nothing is more harmful to the service than the neglect of discipline.", author: "George Washington" },
+  { text: "Self-discipline begins with the mastery of your thoughts.", author: "Napoleon Hill" },
+  { text: "The successful person makes a habit of doing what the failing person doesn't like to do.", author: "Thomas Edison" },
+  { text: "It takes 20 years to build a reputation and five minutes to ruin it.", author: "Warren Buffett" },
+  { text: "You miss 100% of the shots you don't take.", author: "Wayne Gretzky" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "The greatest danger for most of us is not that our aim is too high and we miss it, but that it is too low and we reach it.", author: "Michelangelo" },
+  { text: "Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did do.", author: "Mark Twain" },
+  { text: "Life shrinks or expands in proportion to one's courage.", author: "Anaïs Nin" },
+  { text: "Do one thing every day that scares you.", author: "Eleanor Roosevelt" },
+  { text: "Courage is being scared to death and saddling up anyway.", author: "John Wayne" },
+  { text: "I am not afraid of storms, for I am learning how to sail my ship.", author: "Louisa May Alcott" },
+  { text: "Fortune favors the bold.", author: "Virgil" },
+  { text: "It is impossible to live without failing at something, unless you live so cautiously that you might as well not have lived at all.", author: "J.K. Rowling" },
+  { text: "Courage is resistance to fear, mastery of fear — not absence of fear.", author: "Mark Twain" },
+  { text: "Each time we face our fear, we gain strength, courage, and confidence in the doing.", author: "Theodore Roosevelt" },
+  { text: "Be bold, be brave enough to be your true self.", author: "Queen Latifah" },
+  { text: "Inaction breeds doubt and fear. Action breeds confidence and courage.", author: "Dale Carnegie" },
+  { text: "The secret to happiness is freedom, and the secret to freedom is courage.", author: "Thucydides" },
+  { text: "Nothing in life is to be feared, it is only to be understood.", author: "Marie Curie" },
+  { text: "Do the thing you fear most and the death of fear is certain.", author: "Mark Twain" },
+  { text: "Have the courage to follow your heart and intuition.", author: "Steve Jobs" },
+  { text: "A ship is always safe at shore, but that is not what it is built for.", author: "Albert Einstein" },
+  { text: "Leap and the net will appear.", author: "John Burroughs" },
+  { text: "The two most important days in your life are the day you are born and the day you find out why.", author: "Mark Twain" },
+  { text: "He who has a purpose will find a way.", author: "Old Proverb" },
+  { text: "Your purpose in life is to find your purpose and give your whole heart and soul to it.", author: "Buddha" },
+  { text: "The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate.", author: "Ralph Waldo Emerson" },
+  { text: "Whatever you are, be a good one.", author: "Abraham Lincoln" },
+  { text: "The soul which has no fixed purpose in life is lost.", author: "Michel de Montaigne" },
+  { text: "We are at our very best, and we are happiest, when we are fully engaged in work we enjoy.", author: "Earl Nightingale" },
+  { text: "The meaning of life is to give life meaning.", author: "Ken Hudgins" },
+  { text: "Definiteness of purpose is the starting point of all achievement.", author: "W. Clement Stone" },
+  { text: "Your work is to discover your world and then with all your heart give yourself to it.", author: "Buddha" },
+  { text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
+  { text: "Without purpose, we are rudderless ships on a stormy sea.", author: "Stephen Covey" },
+  { text: "There is no greater gift you can give or receive than to honor your calling.", author: "Oprah Winfrey" },
+  { text: "To live is the rarest thing in the world. Most people just exist.", author: "Oscar Wilde" },
+  { text: "The mystery of human existence lies not in just staying alive, but in finding something to live for.", author: "Fyodor Dostoevsky" },
+  { text: "Make your work to be in keeping with your purpose.", author: "Leonardo da Vinci" },
+  { text: "I don't want to get to the end of my life and find that I have just lived the length of it.", author: "Diane Ackerman" },
+  { text: "Your time is limited; don't waste it living someone else's life.", author: "Steve Jobs" },
+  { text: "Life is never made unbearable by circumstances, but only by lack of meaning and purpose.", author: "Viktor Frankl" },
+  { text: "The present moment is the only moment available to us, and it is the door to all moments.", author: "Thich Nhat Hanh" },
+  { text: "Be here now.", author: "Ram Dass" },
+  { text: "Life is what happens to you while you're busy making other plans.", author: "John Lennon" },
+  { text: "Yesterday is history, tomorrow is a mystery, today is a gift.", author: "Eleanor Roosevelt" },
+  { text: "The secret of health for both mind and body is not to mourn for the past, worry about the future, or anticipate troubles.", author: "Buddha" },
+  { text: "Breathe. Let go. And remind yourself that this very moment is the only one you know you have for sure.", author: "Oprah Winfrey" },
+  { text: "Wherever you are, be all there.", author: "Jim Elliot" },
+  { text: "The now is as it always will have been.", author: "Alan Watts" },
+  { text: "Most humans are never fully present in the now, because unconsciously they believe that the next moment must be more important than this one.", author: "Eckhart Tolle" },
+  { text: "You must live in the present, launch yourself on every wave.", author: "Henry David Thoreau" },
+  { text: "Realize deeply that the present moment is all you ever have.", author: "Eckhart Tolle" },
+  { text: "In the stillness of quiet, if we listen, we can hear the whisper of the heart giving strength to weakness, courage to fear, hope to despair.", author: "Howard Thurman" },
+  { text: "Mindfulness is not a destination; it is a way of traveling.", author: "Jonathan Lehmann" },
+  { text: "If you want to conquer the anxiety of life, live in the moment.", author: "Amit Ray" },
+  { text: "The little things? The little moments? They aren't little.", author: "Jon Kabat-Zinn" },
+  { text: "Slow down and everything you are chasing will come around and catch you.", author: "John De Paola" },
+  { text: "When you do things from your soul, you feel a river moving in you, a joy.", author: "Rumi" },
+  { text: "Your calm mind is the ultimate weapon against your challenges.", author: "Bryant McGill" },
+  { text: "Peace is always beautiful.", author: "Walt Whitman" },
+  { text: "The quieter you become, the more you are able to hear.", author: "Rumi" },
+  { text: "A leader is one who knows the way, goes the way, and shows the way.", author: "John C. Maxwell" },
+  { text: "Leadership is not about being in charge. It's about taking care of those in your charge.", author: "Simon Sinek" },
+  { text: "The greatest leader is not necessarily the one who does the greatest things. He is the one that gets the people to do the greatest things.", author: "Ronald Reagan" },
+  { text: "To handle yourself, use your head; to handle others, use your heart.", author: "Eleanor Roosevelt" },
+  { text: "Management is doing things right; leadership is doing the right things.", author: "Peter Drucker" },
+  { text: "A good leader takes a little more than his share of the blame, a little less than his share of the credit.", author: "Arnold H. Glasgow" },
+  { text: "Before you are a leader, success is all about growing yourself. When you become a leader, success is all about growing others.", author: "Jack Welch" },
+  { text: "The function of leadership is to produce more leaders, not more followers.", author: "Ralph Nader" },
+  { text: "Leadership is the capacity to translate vision into reality.", author: "Warren Bennis" },
+  { text: "The leader who doesn't hesitate before he sends his troops into battle gets obedience, not respect.", author: "Golda Meir" },
+  { text: "Leadership is practiced not so much in words as in attitude and actions.", author: "Harold S. Geneen" },
+  { text: "Great leaders are almost always great simplifiers, who can cut through argument, debate and doubt.", author: "General Colin Powell" },
+  { text: "The speed of the leader is the speed of the gang.", author: "Mary Kay Ash" },
+  { text: "A genuine leader is not a searcher for consensus but a molder of consensus.", author: "Martin Luther King Jr." },
+  { text: "Not the cry, but the flight of a wild duck, leads the flock to fly and follow.", author: "Chinese Proverb" },
+  { text: "Real leadership is leaders recognizing that they serve the people that they lead.", author: "Pete Buttigieg" },
+  { text: "Leaders must be close enough to relate to others, but far enough ahead to motivate them.", author: "John C. Maxwell" },
+  { text: "A good leader inspires people to have confidence in the leader; a great leader inspires people to have confidence in themselves.", author: "Eleanor Roosevelt" },
+  { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+  { text: "People buy into the leader before they buy into the vision.", author: "John C. Maxwell" },
+  { text: "Creativity is intelligence having fun.", author: "Albert Einstein" },
+  { text: "Innovation is seeing what everybody has seen and thinking what nobody has thought.", author: "Albert Einstein" },
+  { text: "An idea that is not dangerous is unworthy of being called an idea at all.", author: "Oscar Wilde" },
+  { text: "Creativity is connecting things.", author: "Steve Jobs" },
+  { text: "Originality is nothing but judicious plagiarism.", author: "Voltaire" },
+  { text: "The worst enemy to creativity is self-doubt.", author: "Sylvia Plath" },
+  { text: "You can't use up creativity. The more you use, the more you have.", author: "Maya Angelou" },
+  { text: "Every artist was first an amateur.", author: "Ralph Waldo Emerson" },
+  { text: "If you can dream it, you can do it.", author: "Walt Disney" },
+  { text: "Imagination is more important than knowledge.", author: "Albert Einstein" },
+  { text: "Creativity is allowing yourself to make mistakes. Art is knowing which ones to keep.", author: "Scott Adams" },
+  { text: "An idea can turn to dust or magic, depending on the talent that rubs against it.", author: "Bill Bernbach" },
+  { text: "Think left and think right and think low and think high. Oh, the thinks you can think up if only you try!", author: "Dr. Seuss" },
+  { text: "Don't think. Thinking is the enemy of creativity.", author: "Ray Bradbury" },
+  { text: "To live a creative life, we must lose our fear of being wrong.", author: "Joseph Chilton Pearce" },
+  { text: "The creative adult is the child who survived.", author: "Ursula K. Le Guin" },
+  { text: "Creativity takes courage.", author: "Henri Matisse" },
+  { text: "There is no innovation and creativity without failure. Period.", author: "Brené Brown" },
+  { text: "Create with the heart; build with the mind.", author: "Criss Jami" },
+  { text: "Daring ideas are like chessmen moved forward; they may be beaten, but they may start a winning game.", author: "Goethe" },
+  { text: "The rich invest in time, the poor invest in money.", author: "Warren Buffett" },
+  { text: "It's not your salary that makes you rich, it's your spending habits.", author: "Charles A. Jaffe" },
+  { text: "Do not save what is left after spending; instead spend what is left after saving.", author: "Warren Buffett" },
+  { text: "Wealth is the ability to fully experience life.", author: "Henry David Thoreau" },
+  { text: "The real measure of your wealth is how much you'd be worth if you lost all your money.", author: "Unknown" },
+  { text: "Financial freedom is available to those who learn about it and work for it.", author: "Robert Kiyosaki" },
+  { text: "Money is only a tool. It will take you wherever you wish, but it will not replace you as the driver.", author: "Ayn Rand" },
+  { text: "Never spend your money before you have earned it.", author: "Thomas Jefferson" },
+  { text: "If you don't find a way to make money while you sleep, you will work until you die.", author: "Warren Buffett" },
+  { text: "A wise person should have money in their head, but not in their heart.", author: "Jonathan Swift" },
+  { text: "The habit of saving is itself an education; it fosters every virtue, teaches self-denial, cultivates the sense of order.", author: "T.T. Munger" },
+  { text: "Success is not how high you have climbed, but how you make a positive difference to the world.", author: "Roy T. Bennett" },
+  { text: "Success usually comes to those who are too busy to be looking for it.", author: "Henry David Thoreau" },
+  { text: "Success is not the key to happiness. Happiness is the key to success.", author: "Albert Schweitzer" },
+  { text: "The secret of success is constancy to purpose.", author: "Benjamin Disraeli" },
+  { text: "Behind every successful person lies a pack of haters.", author: "Eminem" },
+  { text: "The road to success is always under construction.", author: "Lily Tomlin" },
+  { text: "Success is falling nine times and getting up ten.", author: "Jon Bon Jovi" },
+  { text: "Success is stumbling from failure to failure with no loss of enthusiasm.", author: "Winston Churchill" },
+  { text: "There are no shortcuts to any place worth going.", author: "Beverly Sills" },
+  { text: "Take care of your body. It's the only place you have to live.", author: "Jim Rohn" },
+  { text: "It is health that is real wealth and not pieces of gold and silver.", author: "Mahatma Gandhi" },
+  { text: "To keep the body in good health is a duty, otherwise we shall not be able to keep our mind strong and clear.", author: "Buddha" },
+  { text: "A healthy outside starts from the inside.", author: "Robert Urich" },
+  { text: "The groundwork for all happiness is health.", author: "James Leigh Hunt" },
+  { text: "An apple a day keeps the doctor away.", author: "Benjamin Franklin" },
+  { text: "Those who think they have not time for bodily exercise will sooner or later have to find time for illness.", author: "Edward Stanley" },
+  { text: "The first wealth is health.", author: "Ralph Waldo Emerson" },
+  { text: "Health is a state of complete harmony of the body, mind and spirit.", author: "B.K.S. Iyengar" },
+  { text: "Your health is an investment, not an expense.", author: "Unknown" },
+  { text: "Exercise is a celebration of what your body can do, not a punishment for what you ate.", author: "Unknown" },
+  { text: "Sleep is the best meditation.", author: "Dalai Lama" },
+  { text: "The body achieves what the mind believes.", author: "Unknown" },
+  { text: "Healing is a matter of time, but it is sometimes also a matter of opportunity.", author: "Hippocrates" },
+  { text: "To enjoy good health, to bring true happiness to one's family, to bring peace to all, one must first discipline and control one's own mind.", author: "Buddha" },
+  { text: "Movement is a medicine for creating change in a person's physical, emotional, and mental states.", author: "Carol Welch" },
+  { text: "Lack of activity destroys the good condition of every human being, while movement and methodical physical exercise save it and preserve it.", author: "Plato" },
+  { text: "Your body can stand almost anything. It's your mind that you have to convince.", author: "Unknown" },
+  { text: "The doctor of the future will give no medicine but will interest his patients in the care of the human frame, in diet and in the cause and prevention of disease.", author: "Thomas Edison" },
+  { text: "A good laugh and a long sleep are the best cures in the doctor's book.", author: "Irish Proverb" },
+  { text: "We are not put on earth for ourselves, but are placed here for each other.", author: "Jeff Warner" },
+  { text: "No man is an island entire of itself.", author: "John Donne" },
+  { text: "The most important thing in the world is family and love.", author: "John Wooden" },
+  { text: "Treat others as you wish to be treated.", author: "Unknown" },
+  { text: "Be the change that you wish to see in the world.", author: "Mahatma Gandhi" },
+  { text: "A single act of kindness throws out roots in all directions, and the roots spring up and make new trees.", author: "Amelia Earhart" },
+  { text: "Kindness is a language which the deaf can hear and the blind can see.", author: "Mark Twain" },
+  { text: "You don't need a reason to help people.", author: "Unknown" },
+  { text: "If you light a lamp for someone else it will also brighten your path.", author: "Buddha" },
+  { text: "In the end, it's not the years in your life that count. It's the life in your years.", author: "Abraham Lincoln" },
+  { text: "Friendship is not about who you've known the longest, it's about who walked into your life and said 'I'm here for you.'", author: "Unknown" },
+  { text: "The quality of your life is the quality of your relationships.", author: "Tony Robbins" },
+  { text: "A friend is someone who knows all about you and still loves you.", author: "Elbert Hubbard" },
+  { text: "We rise by lifting others.", author: "Robert Ingersoll" },
+  { text: "Try to be a rainbow in someone else's cloud.", author: "Maya Angelou" },
+  { text: "To the world you may be one person; but to one person you may be the world.", author: "Billie Burke" },
+  { text: "One of the most sincere forms of respect is actually listening to what another has to say.", author: "Bryant McGill" },
+  { text: "Remember that everyone you meet is afraid of something, loves something and has lost something.", author: "H. Jackson Brown Jr." },
+  { text: "The best gift you can give is your time, your attention, your love, your concern.", author: "Joel Osteen" },
+  { text: "There is no exercise better for the heart than reaching down and lifting people up.", author: "John Holmes" },
+  { text: "The unexamined life is not worth living.", author: "Socrates" },
+  { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle" },
+  { text: "Wonder is the beginning of wisdom.", author: "Socrates" },
+  { text: "A fool thinks himself to be wise, but a wise man knows himself to be a fool.", author: "William Shakespeare" },
+  { text: "The only true wisdom is in knowing you know nothing.", author: "Socrates" },
+  { text: "He who knows others is wise. He who knows himself is enlightened.", author: "Lao Tzu" },
+  { text: "Wisdom is not a product of schooling but of the lifelong attempt to acquire it.", author: "Albert Einstein" },
+  { text: "Wisdom begins in wonder.", author: "Socrates" },
+  { text: "The invariable mark of wisdom is to see the miraculous in the common.", author: "Ralph Waldo Emerson" },
+  { text: "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.", author: "Rumi" },
+  { text: "The fool speaks, the wise man listens.", author: "Ethiopian Proverb" },
+  { text: "By three methods we may learn wisdom: First, by reflection, which is noblest; second, by imitation, which is easiest; and third by experience, which is the bitterest.", author: "Confucius" },
+  { text: "The wisest men follow their own direction.", author: "Euripides" },
+  { text: "Science is organized knowledge. Wisdom is organized life.", author: "Immanuel Kant" },
+  { text: "Wisdom is knowing when to speak your mind and when to mind your speech.", author: "Evangel" },
+  { text: "Real wisdom is recognizing and accepting that every experience is impermanent.", author: "Gautama Buddha" },
+  { text: "A wise man can learn more from a foolish question than a fool can learn from a wise answer.", author: "Bruce Lee" },
+  { text: "Common sense is not so common.", author: "Voltaire" },
+  { text: "The art of being wise is the art of knowing what to overlook.", author: "William James" },
+  { text: "Wisdom comes from experience. Experience is often a result of lack of wisdom.", author: "Terry Pratchett" },
+  { text: "Change is the law of life. And those who look only to the past or present are certain to miss the future.", author: "John F. Kennedy" },
+  { text: "The secret of change is to focus all your energy not on fighting the old, but on building the new.", author: "Socrates" },
+  { text: "To improve is to change; to be perfect is to change often.", author: "Winston Churchill" },
+  { text: "You cannot step in the same river twice.", author: "Heraclitus" },
+  { text: "Growth is painful. Change is painful. But nothing is as painful as staying stuck somewhere you don't belong.", author: "Mandy Hale" },
+  { text: "Change your thoughts and you change your world.", author: "Norman Vincent Peale" },
+  { text: "If you don't like something, change it. If you can't change it, change your attitude.", author: "Maya Angelou" },
+  { text: "You can't go back and change the beginning, but you can start where you are and change the ending.", author: "C.S. Lewis" },
+  { text: "Life belongs to the living, and he who lives must be prepared for changes.", author: "Johann Wolfgang von Goethe" },
+  { text: "If you want to truly understand something, try to change it.", author: "Kurt Lewin" },
+  { text: "All things must change to something new, to something strange.", author: "Henry Wadsworth Longfellow" },
+  { text: "When you're finished changing, you're finished.", author: "Benjamin Franklin" },
+  { text: "It is not the strongest of the species that survive, nor the most intelligent, but the one most responsive to change.", author: "Charles Darwin" },
+  { text: "Life is change. Growth is optional. Choose wisely.", author: "Karen Kaiser Clark" },
+  { text: "There is nothing permanent except change.", author: "Heraclitus" },
+  { text: "It takes courage to grow up and become who you really are.", author: "e.e. cummings" },
+  { text: "You must be the change you wish to see in the world.", author: "Mahatma Gandhi" },
+  { text: "The measure of intelligence is the ability to change.", author: "Albert Einstein" },
+  { text: "The greatest discovery of any generation is that a human being can alter his life by altering his attitude.", author: "William James" },
+  { text: "Change your life today. Don't gamble on the future, act now, without delay.", author: "Simone de Beauvoir" },
+  { text: "All our dreams can come true, if we have the courage to pursue them.", author: "Walt Disney" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+  { text: "A dream doesn't become reality through magic; it takes sweat, determination and hard work.", author: "Colin Powell" },
+  { text: "Dream big and dare to fail.", author: "Norman Vaughan" },
+  { text: "I have a dream.", author: "Martin Luther King Jr." },
+  { text: "Reach high, for stars lie hidden in your soul. Dream deep, for every dream precedes the goal.", author: "Pamela Vaull Starr" },
+  { text: "Every great dream begins with a dreamer.", author: "Harriet Tubman" },
+  { text: "If your dreams don't scare you, they aren't big enough.", author: "Ellen Johnson Sirleaf" },
+  { text: "Don't tell people your dreams. Show them.", author: "Unknown" },
+  { text: "Your dreams are the blueprint of your destiny.", author: "Unknown" },
+  { text: "Dreams are not what you see in your sleep; dreams are things which do not let you sleep.", author: "Cristiano Ronaldo" },
+  { text: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt" },
+  { text: "Dream big. Start small. But most of all, start.", author: "Simon Sinek" },
+  { text: "The distance between dreams and reality is called action.", author: "Unknown" },
+  { text: "If you can imagine it, you can achieve it. If you can dream it, you can become it.", author: "William Arthur Ward" },
+  { text: "Dream as if you'll live forever. Live as if you'll die today.", author: "James Dean" },
+  { text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis" },
+  { text: "Hold fast to dreams, for if dreams die, life is a broken-winged bird that cannot fly.", author: "Langston Hughes" },
+  { text: "The secret of life is to have a task, something you devote your entire life to.", author: "Henry Moore" },
+  { text: "A man is not old until regrets take the place of dreams.", author: "John Barrymore" },
+  { text: "Gratitude is not only the greatest of virtues, but the parent of all others.", author: "Marcus Tullius Cicero" },
+  { text: "When you are grateful, fear disappears and abundance appears.", author: "Tony Robbins" },
+  { text: "Gratitude unlocks the fullness of life.", author: "Melody Beattie" },
+  { text: "The things you take for granted, someone else is praying for.", author: "Unknown" },
+  { text: "Appreciation can make a day, even change a life.", author: "Margaret Cousins" },
+  { text: "Count your blessings, not your problems.", author: "Unknown" },
+  { text: "Joy is what happens to us when we allow ourselves to recognize how good things really are.", author: "Marianne Williamson" },
+  { text: "Wake at dawn with a winged heart and give thanks for another day of loving.", author: "Khalil Gibran" },
+  { text: "It's not happy people who are thankful; it is thankful people who are happy.", author: "Unknown" },
+  { text: "Gratitude is the sign of noble souls.", author: "Aesop" },
+  { text: "The more grateful I am, the more beauty I see.", author: "Mary Davis" },
+  { text: "Enough is a feast.", author: "Buddhist Proverb" },
+  { text: "Look at everything always as though you were seeing it either for the first or last time.", author: "Betty Smith" },
+  { text: "If the only prayer you ever say in your entire life is 'thank you', it will be enough.", author: "Meister Eckhart" },
+  { text: "Happiness is not something readymade. It comes from your own actions.", author: "Dalai Lama" },
+  { text: "Happiness cannot be traveled to, owned, earned, worn or consumed.", author: "Denis Waitley" },
+  { text: "Most folks are as happy as they make up their minds to be.", author: "Abraham Lincoln" },
+  { text: "The happiness of your life depends upon the quality of your thoughts.", author: "Marcus Aurelius" },
+  { text: "For every minute you are angry you lose sixty seconds of happiness.", author: "Ralph Waldo Emerson" },
+  { text: "Happiness is a journey, not a destination.", author: "Unknown" },
+  { text: "Simplicity is the ultimate form of sophistication.", author: "Clare Booth Luce" },
+  { text: "Nature is pleased with simplicity.", author: "Isaac Newton" },
+  { text: "The ability to simplify means to eliminate the unnecessary so that the necessary may speak.", author: "Hans Hofmann" },
+  { text: "Less is more.", author: "Ludwig Mies van der Rohe" },
+  { text: "Simplicity is not the absence of clutter; that's a good description of emptiness.", author: "Jonathan Ive" },
+  { text: "The greatest step toward a life of simplicity is to learn to let go.", author: "Steve Maraboli" },
+  { text: "Have nothing in your house that you do not know to be useful or believe to be beautiful.", author: "William Morris" },
+  { text: "The things you own end up owning you.", author: "Chuck Palahniuk" },
+  { text: "Declutter your mind, your home, your heart. Remove everything that doesn't make you stronger.", author: "Unknown" },
+  { text: "Reduce the complexity of life by eliminating the needless wants of life.", author: "Edwin Way Teale" },
+  { text: "In character, in manner, in style, in all things, the supreme excellence is simplicity.", author: "Henry Wadsworth Longfellow" },
+  { text: "To find simplicity in the complex and complexity in the simple is the mark of a master.", author: "Unknown" },
+  { text: "Simple can be harder than complex.", author: "Steve Jobs" },
+  { text: "Simplify, simplify.", author: "Henry David Thoreau" },
+  { text: "In order to seek one's own direction, one must simplify the mechanics of ordinary, everyday life.", author: "Plato" },
+  { text: "How you spend your time is how you spend your life.", author: "Unknown" },
+  { text: "Time is the most valuable thing a man can spend.", author: "Theophrastus" },
+  { text: "Time is what we want most, but what we use worst.", author: "William Penn" },
+  { text: "The time you enjoy wasting is not wasted time.", author: "Bertrand Russell" },
+  { text: "Time is the wisest counselor of all.", author: "Pericles" },
+  { text: "Time flies over us, but leaves its shadow behind.", author: "Nathaniel Hawthorne" },
+  { text: "Life is not measured by the number of breaths we take, but by the moments that take our breath away.", author: "Maya Angelou" },
+  { text: "Legacy is not leaving something for people. It's leaving something in people.", author: "Peter Strople" },
+  { text: "The best legacy we can leave is how we treated people.", author: "Unknown" },
+  { text: "Carve your name on hearts, not tombstones.", author: "Shannon L. Alder" },
+  { text: "The purpose of life is to live it, to taste experience to the utmost, to reach out eagerly and without fear for newer and richer experience.", author: "Eleanor Roosevelt" },
+  { text: "We are the sum of all the people we have ever loved, and that's the greatest legacy of all.", author: "Pat Conroy" },
+  { text: "What you do in life echoes in eternity.", author: "Maximus Decimus Meridius" },
+  { text: "We are not human beings having a spiritual experience. We are spiritual beings having a human experience.", author: "Pierre Teilhard de Chardin" },
+  { text: "Be not afraid of greatness. Some are born great, some achieve greatness, and some have greatness thrust upon 'em.", author: "William Shakespeare" },
+  { text: "The harder I work, the luckier I get.", author: "Samuel Goldwyn" },
+  { text: "There are no traffic jams along the extra mile.", author: "Roger Staubach" },
+  { text: "Men are made stronger on realization that the helping hand they need is at the end of their own arm.", author: "Sidney J. Phillips" },
+  { text: "Talent is cheaper than table salt. What separates the talented individual from the successful one is a lot of hard work.", author: "Stephen King" },
+  { text: "Hard work spotlights the character of people: some turn up their sleeves, some turn up their noses, and some don't turn up at all.", author: "Sam Ewing" },
+  { text: "The only place where success comes before work is in the dictionary.", author: "Vidal Sassoon" },
+  { text: "Big shots are only little shots who keep shooting.", author: "Christopher Morley" },
+  { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas Edison" },
+  { text: "The best preparation for tomorrow is doing your best today.", author: "H. Jackson Brown Jr." },
+  { text: "I never dreamed about success, I worked for it.", author: "Estée Lauder" },
+  { text: "You have to fight through some bad days to earn the best days of your life.", author: "Unknown" },
+  { text: "If you're going through hell, keep going.", author: "Winston Churchill" },
+  { text: "Nothing ever comes to one that is worth having except as a result of hard work.", author: "Booker T. Washington" },
+  { text: "Effort is the one factor that makes you better than everyone else.", author: "Unknown" },
+  { text: "Work while they sleep. Learn while they party. Save while they spend. Live like they dream.", author: "Unknown" },
+  { text: "Talent is given, greatness is earned.", author: "Unknown" },
+  { text: "Work until your idols become your rivals.", author: "Unknown" },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "The only way to achieve the impossible is to believe it is possible.", author: "Charles Kingsleigh" },
+  { text: "Character is like a tree and reputation is like a shadow.", author: "Abraham Lincoln" },
+  { text: "Be more concerned with your character than your reputation.", author: "John Wooden" },
+  { text: "A person's character is their fate.", author: "Heraclitus" },
+  { text: "Real integrity is doing the right thing, knowing that nobody's going to know whether you did it or not.", author: "Oprah Winfrey" },
+  { text: "The time is always right to do what is right.", author: "Martin Luther King Jr." },
+  { text: "Integrity is doing the right thing, even when no one is watching.", author: "C.S. Lewis" },
+  { text: "You are what you do, not what you say you'll do.", author: "Carl Jung" },
+  { text: "The strength of a man's virtue should not be measured by his special exertions, but by his habitual acts.", author: "Blaise Pascal" },
+  { text: "How you do anything is how you do everything.", author: "Unknown" },
+  { text: "A man is the sum of his actions, of what he has done, of what he can do, nothing else.", author: "Mahatma Gandhi" },
+  { text: "Honor your commitments with integrity.", author: "Les Brown" },
+  { text: "Ethics is knowing the difference between what you have a right to do and what is right to do.", author: "Potter Stewart" },
+  { text: "In matters of style, swim with the current; in matters of principle, stand like a rock.", author: "Thomas Jefferson" },
+  { text: "Live so that when your children think of fairness and integrity, they think of you.", author: "H. Jackson Brown Jr." },
+  { text: "You can easily judge the character of a man by how he treats those who can do nothing for him.", author: "Malcolm S. Forbes" },
+  { text: "The measure of a man's character is what he would do if he knew he never would be found out.", author: "Thomas Babington Macaulay" },
+  { text: "Be the kind of person you would like to meet.", author: "Unknown" },
+  { text: "People of good character judge themselves more harshly than others judge them.", author: "Marcelene Cox" },
+  { text: "Our greatest glory is not in never failing, but in rising every time we fall.", author: "Confucius" },
+  { text: "Begin with the end in mind.", author: "Stephen Covey" },
+  { text: "Strategy without tactics is the slowest route to victory. Tactics without strategy is the noise before defeat.", author: "Sun Tzu" },
+  { text: "Good business leaders create a vision, articulate the vision, passionately own the vision, and relentlessly drive it to completion.", author: "Jack Welch" },
+  { text: "Setting goals is the first step in turning the invisible into the visible.", author: "Tony Robbins" },
+  { text: "A goal without a plan is just a wish.", author: "Antoine de Saint-Exupéry" },
+  { text: "All successful people have a goal. No one can get anywhere unless he knows where he wants to go and what he wants to be or do.", author: "Norman Vincent Peale" },
+  { text: "If you don't know where you are going, any road will take you there.", author: "Lewis Carroll" },
+  { text: "It's not enough to be busy, so are the ants. The question is, what are we busy about?", author: "Henry David Thoreau" },
+  { text: "The trouble with not having a goal is that you can spend your life running up and down the field and never score.", author: "Bill Copeland" },
+  { text: "You don't have to see the whole staircase, just take the first step.", author: "Martin Luther King Jr." },
+  { text: "Big goals get big results. No goals gets no results or somebody else's results.", author: "Mark Victor Hansen" },
+  { text: "The secret of success is learning how to use pain and pleasure instead of having pain and pleasure use you.", author: "Tony Robbins" },
+  { text: "Think big. Start small. Move fast.", author: "Gary Hamel" },
+  { text: "Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.", author: "Sun Tzu" },
+  { text: "The best way to predict the future is to invent it.", author: "Alan Kay" },
+  { text: "Plan your work for today and every day, then work your plan.", author: "Margaret Thatcher" },
+  { text: "What gets measured gets managed.", author: "Peter Drucker" },
+  { text: "If you fail to plan, you are planning to fail.", author: "Benjamin Franklin" },
+  { text: "Plans are nothing; planning is everything.", author: "Dwight D. Eisenhower" },
+  { text: "The will to win, the desire to succeed, the urge to reach your full potential... these are the keys that will unlock the door to personal excellence.", author: "Confucius" },
+  { text: "In every walk with nature, one receives far more than he seeks.", author: "John Muir" },
+  { text: "Look deep into nature, and then you will understand everything better.", author: "Albert Einstein" },
+  { text: "The clearest way into the Universe is through a forest wilderness.", author: "John Muir" },
+  { text: "We are not apart from nature; we are a part of nature.", author: "Unknown" },
+  { text: "To forget how to dig the earth and to tend the soil is to forget ourselves.", author: "Mahatma Gandhi" },
+  { text: "The mountains are calling and I must go.", author: "John Muir" },
+  { text: "Study nature, love nature, stay close to nature. It will never fail you.", author: "Frank Lloyd Wright" },
+  { text: "Nature does not hurry, yet everything is accomplished.", author: "Lao Tzu" },
+  { text: "Adopt the pace of nature: her secret is patience.", author: "Ralph Waldo Emerson" },
+  { text: "One touch of nature makes the whole world kin.", author: "William Shakespeare" },
+  { text: "Look up at the stars and not down at your feet.", author: "Stephen Hawking" },
+  { text: "Two things are infinite: the universe and human stupidity; and I'm not sure about the universe.", author: "Albert Einstein" },
+  { text: "Space is big. You just won't believe how vastly, hugely, mind-bogglingly big it is.", author: "Douglas Adams" },
+  { text: "The cosmos is within us. We are made of star-stuff.", author: "Carl Sagan" },
+  { text: "The nitrogen in our DNA, the calcium in our teeth, the iron in our blood — were made in the interiors of collapsing stars.", author: "Carl Sagan" },
+  { text: "If you think you are too small to make a difference, try sleeping with a mosquito.", author: "Dalai Lama" },
+  { text: "I am an optimist. It does not seem too much use being anything else.", author: "Winston Churchill" },
+  { text: "The brain is a wonderful organ; it starts working the moment you get up in the morning and does not stop until you get into the office.", author: "Robert Frost" },
+  { text: "Age is something that doesn't matter, unless you are a cheese.", author: "Luis Buñuel" },
+  { text: "If you live to be one hundred, you've got it made. Very few people die past that age.", author: "George Burns" },
+  { text: "Going to church doesn't make you a Christian any more than going to a garage makes you an automobile.", author: "Billy Sunday" },
+  { text: "Never put off till tomorrow what you can do the day after tomorrow just as well.", author: "Mark Twain" },
+  { text: "Everything is funny, as long as it's happening to someone else.", author: "Will Rogers" },
+  { text: "The secret to staying young is to live honestly, eat slowly, and lie about your age.", author: "Lucille Ball" },
+  { text: "I don't want to achieve immortality through my work; I want to achieve it by not dying.", author: "Woody Allen" },
+  { text: "The will to win is important, but the will to prepare is vital.", author: "Joe Paterno" },
+  { text: "Champions aren't made in the gyms. Champions are made from something they have deep inside them — a desire, a dream, a vision.", author: "Muhammad Ali" },
+  { text: "Float like a butterfly, sting like a bee.", author: "Muhammad Ali" },
+  { text: "It's hard to beat a person who never gives up.", author: "Babe Ruth" },
+  { text: "The difference between the impossible and the possible lies in a person's determination.", author: "Tommy Lasorda" },
+  { text: "Winning is not a sometime thing; it's an all-the-time thing.", author: "Vince Lombardi" },
+  { text: "The more difficult the victory, the greater the happiness in winning.", author: "Pelé" },
+  { text: "Pain is temporary. It may last a minute, or an hour, or a day, or a year, but eventually it will subside and something else will take its place.", author: "Lance Armstrong" },
+  { text: "The only way to prove you are a good sport is to lose.", author: "Ernie Banks" },
+  { text: "One man practicing sportsmanship is far better than a hundred teaching it.", author: "Knute Rockne" },
+  { text: "Excellence is not a singular act, but a habit.", author: "Aristotle" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+  { text: "You have to expect things of yourself before you can do them.", author: "Michael Jordan" },
+  { text: "I can accept failure, everyone fails at something. But I can't accept not trying.", author: "Michael Jordan" },
+  { text: "Talent wins games, but teamwork and intelligence wins championships.", author: "Michael Jordan" },
+  { text: "The entrepreneur always searches for change, responds to it, and exploits it as an opportunity.", author: "Peter Drucker" },
+  { text: "I knew that if I failed I wouldn't regret that, but I knew the one thing I might regret is not trying.", author: "Jeff Bezos" },
+  { text: "The biggest risk is not taking any risk.", author: "Mark Zuckerberg" },
+  { text: "Your most unhappy customers are your greatest source of learning.", author: "Bill Gates" },
+  { text: "It's fine to celebrate success but it is more important to heed the lessons of failure.", author: "Bill Gates" },
+  { text: "Move fast and break things. Unless you are breaking stuff, you are not moving fast enough.", author: "Mark Zuckerberg" },
+  { text: "The only thing worse than starting something and failing... is not starting something.", author: "Seth Godin" },
+  { text: "Do or do not. There is no try.", author: "Yoda" },
+  { text: "Whether you think you can, or you think you can't — you're right.", author: "Henry Ford" },
+  { text: "It does not matter how many times you get knocked down, but how many times you get up.", author: "Vince Lombardi" },
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "We must embrace pain and burn it as fuel for our journey.", author: "Kenji Miyazawa" },
+  { text: "Life is not about finding yourself. Life is about creating yourself.", author: "George Bernard Shaw" },
+  { text: "Entrepreneurship is living a few years of your life like most people won't, so you can spend the rest of your life like most people can't.", author: "Unknown" },
+  { text: "The value of an idea lies in the using of it.", author: "Thomas Edison" },
+  { text: "Ideas without execution are just hallucinations.", author: "Thomas Edison" },
+  { text: "Small opportunities are often the beginning of great enterprises.", author: "Demosthenes" },
+  { text: "Make your product easier to buy than your competition, or you will find your customers buying from them, not you.", author: "Mark Cuban" },
+  { text: "Life can only be understood backwards; but it must be lived forwards.", author: "Søren Kierkegaard" },
+  { text: "We are what we pretend to be, so we must be careful about what we pretend to be.", author: "Kurt Vonnegut" },
+  { text: "The good life is one inspired by love and guided by knowledge.", author: "Bertrand Russell" },
+  { text: "We make a living by what we get, but we make a life by what we give.", author: "Winston Churchill" },
+  { text: "In three words I can sum up everything I've learned about life: it goes on.", author: "Robert Frost" },
+  { text: "To love and be loved is to feel the sun from both sides.", author: "David Viscott" },
+  { text: "The most courageous act is still to think for yourself. Aloud.", author: "Coco Chanel" },
+  { text: "The question is not what you look at, but what you see.", author: "Henry David Thoreau" },
+  { text: "Reality is merely an illusion, albeit a very persistent one.", author: "Albert Einstein" },
+  { text: "I am enough of an artist to draw freely upon my imagination.", author: "Albert Einstein" },
+  { text: "If you want to live a happy life, tie it to a goal, not to people or objects.", author: "Albert Einstein" },
+  { text: "The art of living is more like wrestling than dancing.", author: "Marcus Aurelius" },
+  { text: "You don't need to be positive all the time. It's perfectly okay to feel sad, angry, annoyed, frustrated, scared, or anxious.", author: "Lori Deschene" },
+  { text: "The only way to make sense out of change is to plunge into it, move with it, and join the dance.", author: "Alan Watts" },
+  { text: "Flow with whatever may happen and let your mind be free.", author: "Zhuangzi" },
+  { text: "Do not let the behavior of others destroy your inner peace.", author: "Dalai Lama" },
+  { text: "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.", author: "Marcus Aurelius" },
+  { text: "An educated mind is able to entertain a thought without accepting it.", author: "Aristotle" },
+  { text: "Knowledge is power.", author: "Francis Bacon" },
+  { text: "The more you know, the more you realize you don't know.", author: "Aristotle" },
+  { text: "The roots of education are bitter, but the fruit is sweet.", author: "Aristotle" },
+  { text: "It is a miracle that curiosity survives formal education.", author: "Albert Einstein" },
+  { text: "Curiosity is the engine of achievement.", author: "Ken Robinson" },
+  { text: "I have no special talent. I am only passionately curious.", author: "Albert Einstein" },
+  { text: "Reading is to the mind what exercise is to the body.", author: "Joseph Addison" },
+  { text: "Books are the mirrors of the soul.", author: "Virginia Woolf" },
+  { text: "A reader lives a thousand lives before he dies. The man who never reads lives only one.", author: "George R.R. Martin" },
+  { text: "Not all readers are leaders, but all leaders are readers.", author: "Harry S. Truman" },
+  { text: "Reading makes a full man; conference a ready man; and writing an exact man.", author: "Francis Bacon" },
+  { text: "Outside of a dog, a book is a man's best friend.", author: "Groucho Marx" },
+  { text: "No matter how busy you may think you are, you must find time for reading, or surrender yourself to self-chosen ignorance.", author: "Confucius" },
+  { text: "I find television very educational. Every time somebody turns on the set, I go into the other room and read a book.", author: "Groucho Marx" },
+  { text: "Once you learn to read, you will be forever free.", author: "Frederick Douglass" },
+  { text: "A well-read woman is a dangerous creature.", author: "Lisa Kleypas" },
+  { text: "There is no friend as loyal as a book.", author: "Ernest Hemingway" },
+  { text: "Patience is a virtue.", author: "William Langland" },
+  { text: "The strongest of all warriors are these two — Time and Patience.", author: "Leo Tolstoy" },
+  { text: "Everything comes to him who hustles while he waits.", author: "Thomas Edison" },
+  { text: "Good things come to those who wait, but only what's left by those who hustle.", author: "Abraham Lincoln" },
+  { text: "One moment of patience may ward off great disaster. One moment of impatience may ruin a whole life.", author: "Chinese Proverb" },
+  { text: "Rivers know this: there is no hurry. We shall get there some day.", author: "A.A. Milne" },
+  { text: "Never cut a tree down in the wintertime. Never make a negative decision in the low time.", author: "Robert H. Schuller" },
+  { text: "Have patience with all things, but first of all with yourself.", author: "Saint Francis de Sales" },
+  { text: "Patience and time do more than strength or passion.", author: "Jean de La Fontaine" },
+  { text: "A man who is a master of patience is master of everything else.", author: "George Savile" },
+  { text: "The key to everything is patience. You get the chicken by hatching the egg, not by smashing it.", author: "Arnold H. Glasgow" },
+  { text: "He that can have patience can have what he will.", author: "Benjamin Franklin" },
+  { text: "Patience is not the ability to wait, but the ability to keep a good attitude while waiting.", author: "Joyce Meyer" },
+  { text: "To love oneself is the beginning of a lifelong romance.", author: "Oscar Wilde" },
+  { text: "Believe in yourself! Have faith in your abilities!", author: "Norman Vincent Peale" },
+  { text: "Trust yourself. You know more than you think you do.", author: "Benjamin Spock" },
+  { text: "The most common form of despair is not being who you are.", author: "Soren Kierkegaard" },
+  { text: "Always be a first-rate version of yourself, instead of a second-rate version of somebody else.", author: "Judy Garland" },
+  { text: "Confidence comes not from always being right but from not fearing to be wrong.", author: "Peter T. Mcintyre" },
+  { text: "One important key to success is self-confidence. An important key to self-confidence is preparation.", author: "Arthur Ashe" },
+  { text: "What you think of yourself is much more important than what others think of you.", author: "Seneca" },
+  { text: "It took me quite a long time to develop a voice, and now that I have it, I am not going to be silent.", author: "Madeleine Albright" },
+  { text: "Confidence is preparation. Everything else is beyond your control.", author: "Richard Kline" },
+  { text: "You are more powerful than you know; you are beautiful just as you are.", author: "Melissa Etheridge" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Your only limit is your mind.", author: "Unknown" },
+  { text: "Don't be pushed around by the fears in your mind. Be led by the dreams in your heart.", author: "Roy T. Bennett" },
+  { text: "You have within you right now, everything you need to deal with whatever the world can throw at you.", author: "Brian Tracy" },
+  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+  { text: "Don't wait. The time will never be just right.", author: "Napoleon Hill" },
+  { text: "Well done is better than well said.", author: "Benjamin Franklin" },
+  { text: "Take the first step in faith. You don't have to see the whole staircase, just take the first step.", author: "Martin Luther King Jr." },
+  { text: "Whatever you can do, or dream you can do, begin it. Boldness has genius, power, and magic in it.", author: "Johann Wolfgang von Goethe" },
+  { text: "Do what you can, with what you have, where you are.", author: "Theodore Roosevelt" },
+  { text: "I took a deep breath and listened to the old brag of my heart: I am, I am, I am.", author: "Sylvia Plath" },
+  { text: "Act as if what you do makes a difference. It does.", author: "William James" },
+  { text: "An ounce of action is worth a ton of theory.", author: "Ralph Waldo Emerson" },
+  { text: "Stop waiting for Friday, for summer, for someone to fall in love with you.", author: "Unknown" },
+  { text: "If not now, when? If not you, who?", author: "Hillel the Elder" },
+  { text: "Take action! An inch of movement will bring you closer to your goals than a mile of intention.", author: "Steve Maraboli" },
+  { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+  { text: "Begin anywhere.", author: "John Cage" },
+  { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+  { text: "Knowing is not enough; we must apply. Willing is not enough; we must do.", author: "Johann Wolfgang von Goethe" },
+  { text: "Peace is not the absence of conflict; it is the ability to handle conflict by peaceful means.", author: "Ronald Reagan" },
+  { text: "Learn to be calm and you will always be happy.", author: "Paramahansa Yogananda" },
+  { text: "Nothing is so important that it should disturb your inner peace.", author: "Unknown" },
+  { text: "When you find peace within yourself, you become the kind of person who can live at peace with others.", author: "Peace Pilgrim" },
+  { text: "Serenity is not freedom from the storm, but peace within the storm.", author: "Unknown" },
+  { text: "Accept what is, let go of what was, and have faith in what will be.", author: "Sonia Ricotti" },
+  { text: "Make peace with your past so it won't mess up your present.", author: "Unknown" },
+  { text: "God, grant me the serenity to accept the things I cannot change, courage to change the things I can, and wisdom to know the difference.", author: "Reinhold Niebuhr" },
+  { text: "When you stop expecting people to be perfect, you can like them for who they are.", author: "Donald Miller" },
+  { text: "True peace is not merely the absence of tension: it is the presence of justice.", author: "Martin Luther King Jr." },
+  { text: "If you have a problem that can be fixed, then there is no use in worrying. If you have a problem that cannot be fixed, then there is no use in worrying.", author: "Buddhist Saying" },
+  { text: "There is no path to peace. Peace is the path.", author: "Mahatma Gandhi" },
+  { text: "Within you there is a stillness and sanctuary to which you can retreat at any time.", author: "Hermann Hesse" },
+  { text: "Peace comes from within. Do not seek it without.", author: "Buddha" },
+  { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+  { text: "Great things never come from comfort zones.", author: "Unknown" },
+  { text: "Dream it. Wish it. Do it.", author: "Unknown" },
+  { text: "Stay focused and never give up.", author: "Unknown" },
+  { text: "The key to success is to start before you are ready.", author: "Marie Forleo" },
+  { text: "Work hard in silence, let success make the noise.", author: "Frank Ocean" },
+  { text: "Success doesn't come to you, you go to it.", author: "Marva Collins" },
+  { text: "Chase the vision, not the money.", author: "Tony Hsieh" },
+  { text: "Be so good they can't ignore you.", author: "Steve Martin" },
+  { text: "Create the highest, grandest vision possible for your life because you become what you believe.", author: "Oprah Winfrey" },
+  { text: "Go confidently in the direction of your dreams.", author: "Henry David Thoreau" },
+  { text: "Everything you can imagine is real.", author: "Pablo Picasso" },
+  { text: "The worst thing I can be is the same as everybody else.", author: "Arnold Schwarzenegger" },
+  { text: "Make each day your masterpiece.", author: "John Wooden" },
+  { text: "There is only one way to eat an elephant: a bite at a time.", author: "Desmond Tutu" },
+  { text: "Aim for the moon. If you miss, you may hit a star.", author: "W. Clement Stone" },
+  { text: "What we fear doing most is usually what we most need to do.", author: "Timothy Ferriss" },
+  { text: "Your life does not get better by chance, it gets better by change.", author: "Jim Rohn" },
+  { text: "Be the best version of yourself in everything you do.", author: "LeBron James" },
+  { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+  { text: "It is not the man who has too little that is poor, but the man who hankers after more.", author: "Seneca" },
+  { text: "Do not indulge in dreams of having what you have not, but reckon up the chief of the blessings you do possess.", author: "Marcus Aurelius" },
+  { text: "How much time he saves who does not look to see what his neighbor says or does or thinks.", author: "Marcus Aurelius" },
+  { text: "Everything we hear is an opinion, not a fact. Everything we see is a perspective, not the truth.", author: "Marcus Aurelius" },
+  { text: "Reject your sense of injury and the injury itself disappears.", author: "Marcus Aurelius" },
+  { text: "Waste no more time arguing about what a good man should be. Be one.", author: "Marcus Aurelius" },
+  { text: "Never let the future disturb you. You will meet it, if you have to, with the same weapons of reason which today arm you against the present.", author: "Marcus Aurelius" },
+  { text: "If it is not right, do not do it; if it is not true, do not say it.", author: "Marcus Aurelius" },
+  { text: "Before enlightenment, chop wood, carry water. After enlightenment, chop wood, carry water.", author: "Zen Saying" },
+  { text: "When you realize there is nothing lacking, the whole world belongs to you.", author: "Lao Tzu" },
+  { text: "Life is a series of natural and spontaneous changes. Don't resist them.", author: "Lao Tzu" },
+  { text: "To the mind that is still, the whole universe surrenders.", author: "Lao Tzu" },
+  { text: "If you correct your mind, the rest of your life will fall into place.", author: "Lao Tzu" },
+  { text: "Act without expectation.", author: "Lao Tzu" },
+  { text: "The key to growth is the introduction of higher dimensions of consciousness into our awareness.", author: "Lao Tzu" },
+  { text: "The man who asks a question is a fool for a minute, the man who does not ask is a fool for life.", author: "Confucius" },
+  { text: "Real knowledge is to know the extent of one's ignorance.", author: "Confucius" },
+  { text: "I hear and I forget. I see and I remember. I do and I understand.", author: "Confucius" },
+  { text: "The superior man thinks always of virtue; the common man thinks of comfort.", author: "Confucius" },
+  { text: "When it is obvious that the goals cannot be reached, don't adjust the goals, adjust the action steps.", author: "Confucius" },
+  { text: "If you make one mistake, don't double it.", author: "Confucius" },
+  { text: "Without feelings of respect, what is there to distinguish men from beasts?", author: "Confucius" },
+  { text: "To see what is right and not do it is cowardice.", author: "Confucius" },
+  { text: "It takes a village to raise a child.", author: "African Proverb" },
+  { text: "If you want to go fast, go alone. If you want to go far, go together.", author: "African Proverb" },
+  { text: "Until the lion tells his side of the story, the tale of the hunt will always glorify the hunter.", author: "African Proverb" },
+  { text: "However long the night, the dawn will break.", author: "African Proverb" },
+  { text: "A child who is not embraced by the village will burn it down to feel its warmth.", author: "African Proverb" },
+  { text: "When the music changes, so does the dance.", author: "African Proverb" },
+  { text: "Every morning in Africa, a gazelle wakes up knowing it must run faster than the fastest lion or it will be killed.", author: "African Proverb" },
+  { text: "Wisdom is like a baobab tree; no one individual can embrace it.", author: "African Proverb" },
+  { text: "The wise do not sit idle and allow things to happen to them.", author: "African Proverb" },
+  { text: "Rain does not fall on one roof alone.", author: "African Proverb" },
+  { text: "The soul that sees beauty may sometimes walk alone.", author: "Johann Wolfgang von Goethe" },
+  { text: "There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.", author: "Albert Einstein" },
+  { text: "Not until we are lost do we begin to understand ourselves.", author: "Henry David Thoreau" },
+  { text: "The privilege of a lifetime is being who you are.", author: "Joseph Campbell" },
+  { text: "Follow your bliss.", author: "Joseph Campbell" },
+  { text: "The cave you fear to enter holds the treasure you seek.", author: "Joseph Campbell" },
+  { text: "We must be willing to let go of the life we planned so as to have the life that is waiting for us.", author: "Joseph Campbell" },
+  { text: "Where you stumble, there lies your treasure.", author: "Joseph Campbell" },
+  { text: "Life is without meaning. You bring the meaning to it.", author: "Joseph Campbell" },
+  { text: "The eternal quest of the individual human being is to shatter his loneliness.", author: "Norman Cousins" },
+  { text: "The sacred is everywhere, if we allow ourselves to see it.", author: "Unknown" },
+  { text: "Your task is not to seek for love, but merely to seek and find all the barriers within yourself that you have built against it.", author: "Rumi" },
+  { text: "Out beyond ideas of wrongdoing and rightdoing there is a field. I'll meet you there.", author: "Rumi" },
+  { text: "Let the beauty we love be what we do.", author: "Rumi" },
+  { text: "The wound is the place where the Light enters you.", author: "Rumi" },
+  { text: "Stop acting so small. You are the universe in ecstatic motion.", author: "Rumi" },
+  { text: "You are not a drop in the ocean. You are the entire ocean in a drop.", author: "Rumi" },
+  { text: "Sell your cleverness and buy bewilderment.", author: "Rumi" },
+  { text: "Be like water making its way through cracks.", author: "Bruce Lee" },
+  { text: "Be water, my friend.", author: "Bruce Lee" },
+  { text: "Family is not an important thing. It's everything.", author: "Michael J. Fox" },
+  { text: "In family life, love is the oil that eases friction, the cement that binds closer together, and the music that brings harmony.", author: "Friedrich Nietzsche" },
+  { text: "The love of family and the admiration of friends is much more important than wealth and privilege.", author: "Charles Kuralt" },
+  { text: "You don't choose your family. They are God's gift to you, as you are to them.", author: "Desmond Tutu" },
+  { text: "Other things may change us, but we start and end with family.", author: "Anthony Brandt" },
+  { text: "A happy family is but an earlier heaven.", author: "George Bernard Shaw" },
+  { text: "Home is where the heart is.", author: "Pliny the Elder" },
+  { text: "Children are the world's most valuable resource and its best hope for the future.", author: "John F. Kennedy" },
+  { text: "Parents can only give good advice or put them on the right paths, but the final forming of a person's character lies in their own hands.", author: "Anne Frank" },
+  { text: "It is not flesh and blood but the heart which makes us fathers and sons.", author: "Friedrich Schiller" },
+  { text: "Fear is a reaction. Courage is a decision.", author: "Winston Churchill" },
+  { text: "You gain strength, courage, and confidence by every experience in which you really stop to look fear in the face.", author: "Eleanor Roosevelt" },
+  { text: "I have learned that courage was not the absence of fear, but the triumph over it.", author: "Nelson Mandela" },
+  { text: "The brave man is not he who does not feel afraid, but he who conquers that fear.", author: "Nelson Mandela" },
+  { text: "Don't be afraid of your fears. They're not there to scare you. They're there to let you know that something is worth it.", author: "C. JoyBell C." },
+  { text: "If you are distressed by anything external, the pain is not due to the thing itself, but to your estimate of it; and this you have the power to revoke at any moment.", author: "Marcus Aurelius" },
+  { text: "Fear keeps us focused on the past or worried about the future. If we can acknowledge our fear, we can realize that right now we are okay.", author: "Thich Nhat Hanh" },
+  { text: "I must not fear. Fear is the mind-killer.", author: "Frank Herbert" },
+  { text: "Do the thing you fear to do and keep on doing it.", author: "Dale Carnegie" },
+  { text: "Failure is the condiment that gives success its flavor.", author: "Truman Capote" },
+  { text: "There is no failure except in no longer trying.", author: "Elbert Hubbard" },
+  { text: "We learn from failure, not from success!", author: "Bram Stoker" },
+  { text: "Success is not built on success. It's built on failure. It's built on frustration.", author: "Sumner Redstone" },
+  { text: "If you learn from defeat, you haven't really lost.", author: "Zig Ziglar" },
+  { text: "I have not failed. I've just found 10,000 ways that won't work.", author: "Thomas Edison" },
+  { text: "Mistakes are always forgivable, if one has the courage to admit them.", author: "Bruce Lee" },
+  { text: "Never let the fear of striking out keep you from playing the game.", author: "Babe Ruth" },
+  { text: "Failure is only the opportunity to begin again, this time more intelligently.", author: "Henry Ford" },
+  { text: "It's okay to fail. It's not okay to not try.", author: "Unknown" },
+  { text: "I've missed more than 9,000 shots in my career. I've lost almost 300 games. 26 times, I've been trusted to take the game winning shot and missed. I've failed over and over and over again in my life.", author: "Michael Jordan" },
+  { text: "You build on failure. You use it as a stepping stone.", author: "Johnny Cash" },
+  { text: "One who makes no mistakes makes nothing at all.", author: "Giacomo Casanova" },
+  { text: "Only those who dare to fail greatly can ever achieve greatly.", author: "Robert F. Kennedy" },
+  { text: "Art enables us to find ourselves and lose ourselves at the same time.", author: "Thomas Merton" },
+  { text: "Every artist dips his brush in his own soul, and paints his own nature into his pictures.", author: "Henry Ward Beecher" },
+  { text: "Music gives color to the air of the moment.", author: "Karl Lagerfeld" },
+  { text: "Art washes away from the soul the dust of everyday life.", author: "Pablo Picasso" },
+  { text: "The purpose of art is washing the dust of daily life off our souls.", author: "Pablo Picasso" },
+  { text: "Without music, life would be a mistake.", author: "Friedrich Nietzsche" },
+  { text: "Music is the shorthand of emotion.", author: "Leo Tolstoy" },
+  { text: "One good thing about music, when it hits you, you feel no pain.", author: "Bob Marley" },
+  { text: "To create one's own world in any of the arts takes courage.", author: "Georgia O'Keeffe" },
+  { text: "Art is not what you see, but what you make others see.", author: "Edgar Degas" },
+  { text: "Beauty is in the eye of the beholder.", author: "Margaret Wolfe Hungerford" },
+  { text: "Everything has beauty, but not everyone sees it.", author: "Confucius" },
+  { text: "Beauty will save the world.", author: "Fyodor Dostoevsky" },
+  { text: "The most beautiful thing we can experience is the mysterious.", author: "Albert Einstein" },
+  { text: "Art is a lie that makes us realize truth.", author: "Pablo Picasso" },
+  { text: "The truth will set you free, but first it will make you miserable.", author: "James A. Garfield" },
+  { text: "There are three things you can't hide: the sun, the moon and the truth.", author: "Buddha" },
+  { text: "Truth is powerful and it prevails.", author: "Sojourner Truth" },
+  { text: "A lie gets halfway around the world before the truth has a chance to put on its pants.", author: "Winston Churchill" },
+  { text: "If you tell the truth, you don't have to remember anything.", author: "Mark Twain" },
+  { text: "Honesty is the best policy.", author: "Benjamin Franklin" },
+  { text: "In a time of deceit, telling the truth is a revolutionary act.", author: "George Orwell" },
+  { text: "Better to be slapped with the truth than kissed with a lie.", author: "Russian Proverb" },
+  { text: "Truth never damages a cause that is just.", author: "Mahatma Gandhi" },
+  { text: "Love is not what you say. Love is what you do.", author: "Unknown" },
+  { text: "The best thing to hold onto in life is each other.", author: "Audrey Hepburn" },
+  { text: "We loved with a love that was more than love.", author: "Edgar Allan Poe" },
+  { text: "Love all, trust a few, do wrong to none.", author: "William Shakespeare" },
+  { text: "Love begins by taking care of the closest ones.", author: "Mother Teresa" },
+  { text: "I have decided to stick with love. Hate is too great a burden to bear.", author: "Martin Luther King Jr." },
+  { text: "Love is that condition in which the happiness of another person is essential to your own.", author: "Robert A. Heinlein" },
+  { text: "Life is the flower for which love is the honey.", author: "Victor Hugo" },
+  { text: "Where there is love there is life.", author: "Mahatma Gandhi" },
+  { text: "The only disability in life is a bad attitude.", author: "Scott Hamilton" },
+  { text: "Life is 10% what happens to you and 90% how you react to it.", author: "Charles R. Swindoll" },
+  { text: "Two men looked out from prison bars, one saw the mud, the other saw stars.", author: "Dale Carnegie" },
+  { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair" },
+  { text: "When one door closes, another opens; but we often look so long at the closed door that we do not see the one which has opened for us.", author: "Alexander Graham Bell" },
+  { text: "Some people see the glass half full. Others see it half empty. I see a glass that's twice as big as it needs to be.", author: "George Carlin" },
+  { text: "The optimist sees opportunity in every difficulty. The pessimist sees difficulty in every opportunity.", author: "Winston Churchill" },
+  { text: "Change the way you look at things and the things you look at change.", author: "Wayne Dyer" },
+  { text: "Just start.", author: "Unknown" },
+  { text: "Breathe.", author: "Unknown" },
+  { text: "Do more.", author: "Unknown" },
+  { text: "Stay humble.", author: "Unknown" },
+  { text: "Keep going.", author: "Unknown" },
+  { text: "Be grateful.", author: "Unknown" },
+  { text: "Stay focused.", author: "Unknown" },
+  { text: "Never settle.", author: "Unknown" },
+  { text: "Be relentless.", author: "Unknown" },
+  { text: "Trust the process.", author: "Unknown" },
+  { text: "Eyes on the prize.", author: "Unknown" },
+  { text: "Level up.", author: "Unknown" },
+  { text: "Make it happen.", author: "Unknown" },
+  { text: "Earn it.", author: "Unknown" },
+  { text: "Show up.", author: "Unknown" },
+  { text: "Decide. Commit. Succeed.", author: "Unknown" },
+  { text: "Think bigger.", author: "Unknown" },
+  { text: "Rise and grind.", author: "Unknown" },
+  { text: "Progress, not perfection.", author: "Unknown" },
+  { text: "The secret of getting started is breaking your complex overwhelming tasks into small manageable tasks, and then starting on the first one.", author: "Mark Twain" },
+  { text: "It is never too late to be what you might have been.", author: "George Eliot" },
+  { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
+  { text: "All we have to decide is what to do with the time that is given us.", author: "J.R.R. Tolkien" },
+  { text: "Even darkness must pass. A new day will come.", author: "J.R.R. Tolkien" },
+  { text: "Do I dare disturb the universe?", author: "T.S. Eliot" },
+  { text: "I took the road less traveled by, and that has made all the difference.", author: "Robert Frost" },
+  { text: "Write it on your heart that every day is the best day in the year.", author: "Ralph Waldo Emerson" },
+  { text: "Nothing of me is original. I am the combined effort of everyone I've ever known.", author: "Chuck Palahniuk" },
+  { text: "It's the possibility of having a dream come true that makes life interesting.", author: "Paulo Coelho" },
+  { text: "When you want something, all the universe conspires in helping you to achieve it.", author: "Paulo Coelho" },
+  { text: "There is only one thing that makes a dream impossible to achieve: the fear of failure.", author: "Paulo Coelho" },
+  { text: "Tell me, what is it you plan to do with your one wild and precious life?", author: "Mary Oliver" },
+  { text: "Instructions for living a life: Pay attention. Be astonished. Tell about it.", author: "Mary Oliver" },
+  { text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+  { text: "Science is the great antidote to the poison of enthusiasm and superstition.", author: "Adam Smith" },
+  { text: "Intelligence is the ability to adapt to change.", author: "Stephen Hawking" },
+  { text: "Life would be tragic if it weren't funny.", author: "Stephen Hawking" },
+  { text: "Not only is the Universe stranger than we think, it is stranger than we can think.", author: "Werner Heisenberg" },
+  { text: "The day science begins to study non-physical phenomena, it will make more progress in one decade than in all the previous centuries.", author: "Nikola Tesla" },
+  { text: "If you want to find the secrets of the universe, think in terms of energy, frequency, and vibration.", author: "Nikola Tesla" },
+  { text: "The present is theirs; the future, for which I really worked, is mine.", author: "Nikola Tesla" },
+  { text: "The greatest scientists are artists as well.", author: "Albert Einstein" },
+  { text: "If we knew what we were doing, it would not be called research, would it?", author: "Albert Einstein" },
+  { text: "We cannot solve our problems with the same thinking we used when we created them.", author: "Albert Einstein" },
+  { text: "The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.", author: "Albert Einstein" },
+  { text: "Hope is being able to see that there is light despite all of the darkness.", author: "Desmond Tutu" },
+  { text: "Faith is taking the first step even when you don't see the whole staircase.", author: "Martin Luther King Jr." },
+  { text: "Hope is a waking dream.", author: "Aristotle" },
+  { text: "Let your hopes, not your hurts, shape your future.", author: "Robert H. Schuller" },
+  { text: "Hope sees the invisible, feels the intangible and achieves the impossible.", author: "Helen Keller" },
+  { text: "Once you choose hope, anything's possible.", author: "Christopher Reeve" },
+  { text: "We must accept finite disappointment, but never lose infinite hope.", author: "Martin Luther King Jr." },
+  { text: "I believe that tomorrow is another day and I believe in miracles.", author: "Audrey Hepburn" },
+  { text: "Where there is hope there is life.", author: "Anne Frank" },
+  { text: "The very least you can do in your life is to figure out what you hope for.", author: "Barbara Kingsolver" },
+  { text: "Freedom is not worth having if it does not include the freedom to make mistakes.", author: "Mahatma Gandhi" },
+  { text: "For to be free is not merely to cast off one's chains, but to live in a way that respects and enhances the freedom of others.", author: "Nelson Mandela" },
+  { text: "Freedom is the oxygen of the soul.", author: "Moshe Dayan" },
+  { text: "None who have always been free can understand the terrible fascinating power of the hope of freedom to those who are not free.", author: "Pearl S. Buck" },
+  { text: "Freedom lies in being bold.", author: "Robert Frost" },
+  { text: "I am no bird; and no net ensnares me: I am a free human being with an independent will.", author: "Charlotte Brontë" },
+  { text: "Expose yourself to your deepest fear; after that, fear has no power.", author: "Jim Morrison" },
+  { text: "Independence is a heady draft, and if you drink it in your youth, it can have the same effect on the brain as young wine does.", author: "Maya Angelou" },
+  { text: "No one outside ourselves can rule us inwardly.", author: "Buddha" },
+  { text: "Success is not measured by what you accomplish but by the opposition you have encountered.", author: "Orison Swett Marden" },
+  { text: "Success seems to be connected with action. Successful people keep moving.", author: "Conrad Hilton" },
+  { text: "Develop an attitude of gratitude, and give thanks for everything that happens to you.", author: "Brian Tracy" },
+  { text: "The will to succeed is important, but what's more important is the will to prepare.", author: "Bobby Knight" },
+  { text: "Don't be distracted by criticism. Remember, the only taste of success some people have is when they take a bite out of you.", author: "Zig Ziglar" },
+  { text: "Success is how high you bounce when you hit bottom.", author: "George S. Patton" },
+  { text: "The price of success is hard work, dedication to the job at hand.", author: "Vince Lombardi" },
+  { text: "I'd rather attempt to do something great and fail than to attempt to do nothing and succeed.", author: "Robert H. Schuller" },
+  { text: "Success is never owned; it is only rented, and the rent is due every day.", author: "Rory Vaden" },
+  { text: "There is no elevator to success. You have to take the stairs.", author: "Unknown" },
+  { text: "Success is what happens after you have survived all your mistakes.", author: "Anuj Somany" },
+  { text: "The difference between successful people and really successful people is that really successful people say no to almost everything.", author: "Warren Buffett" },
+  { text: "Success in life is not for those who run fast, but for those who keep running and always on the move.", author: "Tokuda Shigeru" },
+  { text: "The most important thing about a person is what they do with the minutes they have.", author: "Unknown" },
+  { text: "Balance is not something you find, it's something you create.", author: "Jana Kingsford" },
+  { text: "You can have it all. Just not all at once.", author: "Oprah Winfrey" },
+  { text: "Never get so busy making a living that you forget to make a life.", author: "Dolly Parton" },
+  { text: "The key to keeping your balance is knowing when you've lost it.", author: "Unknown" },
+  { text: "Happiness is not a matter of intensity but of balance and order and rhythm and harmony.", author: "Thomas Merton" },
+  { text: "In order to carry a positive action we must develop here a positive vision.", author: "Dalai Lama" },
+  { text: "The main thing is to keep the main thing the main thing.", author: "Stephen Covey" },
+  { text: "Do not lose yourself trying to hold onto someone who doesn't care about losing you.", author: "Unknown" },
+  { text: "Sometimes you need to step outside, get some air, and remind yourself of who you are and where you want to be.", author: "Unknown" },
+  { text: "The most common way people give up their power is by thinking they don't have any.", author: "Alice Walker" },
+  { text: "No one can make you feel inferior without your consent.", author: "Eleanor Roosevelt" },
+  { text: "You are not what happened to you. You are what you choose to become.", author: "Unknown" },
+  { text: "Your life is your message to the world. Make it inspiring.", author: "Lorrin L. Lee" },
+  { text: "You are stronger than you think.", author: "Unknown" },
+  { text: "The power you have is to be the best version of yourself you can be, so you can create a better world.", author: "Ashley Rickards" },
+  { text: "Never underestimate the power of dreams and the influence of the human spirit.", author: "Wilma Rudolph" },
+  { text: "You are capable of more than you know.", author: "E.O. Wilson" },
+  { text: "Step out of your comfort zone. Growth and comfort do not coexist.", author: "Ginni Rometty" },
+  { text: "The oak fought the wind and was broken, the willow bent when it must and survived.", author: "Robert Jordan" },
+  { text: "You can't stop the waves, but you can learn to surf.", author: "Jon Kabat-Zinn" },
+  { text: "Smooth seas do not make skillful sailors.", author: "African Proverb" },
+  { text: "The greater the storm, the brighter the rainbow.", author: "Unknown" },
+  { text: "A smooth sea never made a skilled sailor.", author: "Franklin D. Roosevelt" },
+  { text: "Stars are born from the explosion of chaos.", author: "Unknown" },
+  { text: "Out of clutter, find simplicity.", author: "Albert Einstein" },
+  { text: "From discord find harmony.", author: "Albert Einstein" },
+  { text: "Even a clock that does not work is right twice a day.", author: "Polish Proverb" },
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "We are all unique, and if that is not fulfilled, then something has been lost.", author: "Martha Graham" },
+  { text: "You were born an original. Don't die a copy.", author: "John Mason" },
+  { text: "The soul becomes dyed with the color of its thoughts.", author: "Marcus Aurelius" },
+  { text: "What a man thinks of himself, that is what determines, or rather indicates, his fate.", author: "Henry David Thoreau" },
+  { text: "We don't see things as they are, we see them as we are.", author: "Anaïs Nin" },
+  { text: "The eye sees only what the mind is prepared to comprehend.", author: "Robertson Davies" },
+  { text: "Each person sees what he carries in his heart.", author: "Johann Wolfgang von Goethe" },
+  { text: "The mind is everything. What you think you become.", author: "Buddha" },
+  { text: "Always borrow money from a pessimist. He won't expect it back.", author: "Oscar Wilde" },
+  { text: "I never travel without my diary. One should always have something sensational to read in the train.", author: "Oscar Wilde" },
+  { text: "The trouble with the world is that the stupid are cocksure and the intelligent are full of doubt.", author: "Bertrand Russell" },
+  { text: "If at first you don't succeed, then skydiving definitely isn't for you.", author: "Steven Wright" },
+  { text: "To succeed in life, you need three things: a wishbone, a backbone and a funny bone.", author: "Reba McEntire" },
+  { text: "The only mystery in life is why the kamikaze pilots wore helmets.", author: "Al McGuire" },
+  { text: "I asked God for a bike, but I know God doesn't work that way. So I stole a bike and asked for forgiveness.", author: "Emo Philips" },
+  { text: "Men marry women with the hope they will never change. Women marry men with the hope they will change.", author: "Albert Einstein" },
+  { text: "A day without laughter is a day wasted.", author: "Charlie Chaplin" },
+  { text: "The earth does not belong to us. We belong to the earth.", author: "Chief Seattle" },
+  { text: "We do not inherit the earth from our ancestors; we borrow it from our children.", author: "Native American Proverb" },
+  { text: "The environment is where we all meet; where we all have a mutual interest.", author: "Lady Bird Johnson" },
+  { text: "To plant a garden is to believe in tomorrow.", author: "Audrey Hepburn" },
+  { text: "The richness I achieve comes from nature, the source of my inspiration.", author: "Claude Monet" },
+  { text: "Nature is not a place to visit. It is home.", author: "Gary Snyder" },
+  { text: "In all things of nature there is something of the marvelous.", author: "Aristotle" },
+  { text: "Love the world as your own self; then you can truly care for all things.", author: "Lao Tzu" },
+  { text: "The Earth is what we all have in common.", author: "Wendell Berry" },
+  { text: "A mind is like a parachute. It doesn't work if it is not open.", author: "Frank Zappa" },
+  { text: "Strength doesn't come from what you can do. It comes from overcoming the things you once thought you couldn't.", author: "Rikki Rogers" },
+  { text: "Mental toughness is doing the right thing for the team when it's not the best thing for you.", author: "Bill Belichick" },
+  { text: "The mind is not a vessel to be filled, but a fire to be kindled.", author: "Plutarch" },
+  { text: "A strong man masters others. A man of supreme strength masters himself.", author: "Lao Tzu" },
+  { text: "People who are crazy enough to think they can change the world, are the ones who do.", author: "Rob Siltanen" },
+  { text: "Your mind is a powerful thing. When you fill it with positive thoughts, your life will start to change.", author: "Unknown" },
+  { text: "The mind is the limit. As long as the mind can envision the fact that you can do something, you can do it.", author: "Arnold Schwarzenegger" },
+  { text: "Nurture your mind with great thoughts, for you will never go any higher than you think.", author: "Benjamin Disraeli" },
+  { text: "The best way to find yourself is to lose yourself in the service of others.", author: "Mahatma Gandhi" },
+  { text: "We make a living by what we get. We make a life by what we give.", author: "Winston Churchill" },
+  { text: "No one is useless in this world who lightens the burdens of another.", author: "Charles Dickens" },
+  { text: "You have not lived today until you have done something for someone who can never repay you.", author: "John Bunyan" },
+  { text: "Give, and it will be given to you.", author: "Luke 6:38" },
+  { text: "Service to others is the rent you pay for your room here on earth.", author: "Muhammad Ali" },
+  { text: "The measure of life is not its duration, but its donation.", author: "Peter Marshall" },
+  { text: "Do your little bit of good where you are; it's those little bits of good put together that overwhelm the world.", author: "Desmond Tutu" },
+  { text: "No act of kindness, no matter how small, is ever wasted.", author: "Aesop" },
+  { text: "If you want happiness for an hour, take a nap. If you want happiness for a day, go fishing. If you want happiness for a year, inherit a fortune. If you want happiness for a lifetime, help somebody.", author: "Chinese Proverb" },
+  { text: "Be yourself; the world worships the original.", author: "Ingrid Bergman" },
+  { text: "Sometimes I've believed as many as six impossible things before breakfast.", author: "Lewis Carroll" },
+  { text: "What is now proved was once only imagined.", author: "William Blake" },
+  { text: "No great mind has ever existed without a touch of madness.", author: "Aristotle" },
+  { text: "The key is to keep company only with people who uplift you.", author: "Epictetus" },
+  { text: "Know thyself.", author: "Socrates" },
+  { text: "With everything that has happened to you, you can either feel sorry for yourself or treat what has happened as a gift.", author: "Wayne Dyer" },
+  { text: "Every experience, no matter how bad it seems, holds within it a blessing of some kind.", author: "Buddha" },
+  { text: "The best way out is always through.", author: "Robert Frost" },
+  { text: "Everything you need, you already have.", author: "Wayne Dyer" },
+  { text: "If you don't go after what you want, you'll never have it.", author: "Nora Roberts" },
+  { text: "The longer I live, the more I realize the impact of attitude on life.", author: "Charles R. Swindoll" },
+  { text: "Your attitude, not your aptitude, will determine your altitude.", author: "Zig Ziglar" },
+  { text: "Weakness of attitude becomes weakness of character.", author: "Albert Einstein" },
+  { text: "When you arise in the morning, think of what a privilege it is to be alive.", author: "Marcus Aurelius" },
+  { text: "Life is about making an impact, not making an income.", author: "Kevin Kruse" },
+  { text: "Whatever the mind of man can conceive and believe, it can achieve.", author: "Napoleon Hill" },
+  { text: "Strive not to be a success, but rather to be of value.", author: "Albert Einstein" },
+  { text: "I attribute my success to this: I never gave or took any excuse.", author: "Florence Nightingale" },
+  { text: "If you can't explain it simply, you don't understand it well enough.", author: "Albert Einstein" },
+  { text: "I am a slow walker, but I never walk back.", author: "Abraham Lincoln" },
+  { text: "We can't help everyone, but everyone can help someone.", author: "Ronald Reagan" },
+  { text: "Remember that happiness is a way of travel, not a destination.", author: "Roy M. Goodman" },
+  { text: "The most important thing is to enjoy your life — to be happy.", author: "Audrey Hepburn" },
+  { text: "People rarely succeed unless they have fun in what they are doing.", author: "Dale Carnegie" },
+  { text: "Don't wish it were easier, wish you were better.", author: "Jim Rohn" },
+  { text: "Be the kind of leader you would follow.", author: "Unknown" },
+  { text: "Nothing is impossible; the word itself says 'I'm possible.'", author: "Audrey Hepburn" },
+  { text: "Try not to become a person of success, but rather try to become a person of value.", author: "Albert Einstein" },
+  { text: "You only live once, but if you do it right, once is enough.", author: "Mae West" },
+  { text: "You can never have a positive life with a negative mind.", author: "Joyce Meyer" },
+  { text: "Embrace the glorious mess that you are.", author: "Elizabeth Gilbert" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Continuous improvement is better than delayed perfection.", author: "Mark Twain" },
+  { text: "What you get by achieving your goals is not as important as what you become by achieving them.", author: "Henry David Thoreau" },
+  { text: "I am not afraid of dying. I am afraid of not living.", author: "Unknown" },
+  { text: "A warrior is not someone who fights; it is someone who never gives up.", author: "Unknown" },
+  { text: "Believe in the power of your story.", author: "Unknown" },
+  { text: "Your future is created by what you do today, not tomorrow.", author: "Robert Kiyosaki" },
+  { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+  { text: "True happiness is not attained through self-gratification, but through fidelity to a worthy purpose.", author: "Helen Keller" },
+  { text: "What you focus on grows, what you think about expands, and what you dwell upon determines your destiny.", author: "Robin Sharma" },
+  { text: "If you can dream it, you can achieve it.", author: "Zig Ziglar" },
+  { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" },
+  { text: "Keep your face always toward the sunshine, and shadows will fall behind you.", author: "Walt Whitman" },
+  { text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "Success is not the absence of failure; it's the persistence through failure.", author: "Aisha Tyler" },
+  { text: "Life begins at the end of your comfort zone.", author: "Neale Donald Walsch" },
+  { text: "You don't have to be perfect to be amazing.", author: "Unknown" },
+  { text: "Every day is a new beginning. Take a deep breath and start again.", author: "Unknown" },
+  { text: "Even the darkest night will end and the sun will rise.", author: "Victor Hugo" },
+  { text: "A river cuts through rock, not because of its power, but because of its persistence.", author: "Jim Watkins" },
+  { text: "What we plant in the soil of contemplation, we shall reap in the harvest of action.", author: "Meister Eckhart" },
+  { text: "Wake up determined. Go to bed satisfied.", author: "Unknown" },
+  { text: "The struggle you're in today is developing the strength you need tomorrow.", author: "Robert Tew" },
+  { text: "A good laugh recharges your battery.", author: "Unknown" },
+  { text: "Every accomplishment starts with the decision to try.", author: "John F. Kennedy" },
+  { text: "Be the reason someone smiles today.", author: "Unknown" },
+  { text: "Always be a little kinder than necessary.", author: "James M. Barrie" },
+  { text: "Enjoy the little things, for one day you may look back and realize they were the big things.", author: "Robert Brault" },
+  { text: "When you change the way you look at things, the things you look at change.", author: "Max Planck" },
+  { text: "The more you know yourself, the more clarity there is.", author: "Jiddu Krishnamurti" },
+  { text: "Do small things with great love.", author: "Mother Teresa" },
+  { text: "Make improvements, not excuses.", author: "Unknown" },
+  { text: "If you genuinely want something, don't wait for it, teach yourself to be impatient.", author: "Gurbaksh Chahal" },
+  { text: "One person can make a difference, and every person should try.", author: "John F. Kennedy" },
+  { text: "Everything can be taken from a man but one thing: the last of the human freedoms.", author: "Viktor Frankl" },
+  { text: "Success is not in never falling, but in rising every time you fall.", author: "Confucius" },
+  { text: "Yesterday's home runs don't win today's games.", author: "Babe Ruth" },
+  { text: "Don't be afraid to stand for what you believe in.", author: "Unknown" },
+  { text: "No matter what people tell you, words and ideas can change the world.", author: "Robin Williams" },
+  { text: "When something bad happens, you have three choices: let it define you, let it destroy you, or let it strengthen you.", author: "Unknown" },
+  { text: "The price of anything is the amount of life you exchange for it.", author: "Henry David Thoreau" },
+  { text: "The two most powerful words when we're in struggle: me too.", author: "Brené Brown" },
+  { text: "Vulnerability is not weakness. It's our greatest measure of courage.", author: "Brené Brown" },
+  { text: "You are braver than you believe, stronger than you seem, and smarter than you think.", author: "A.A. Milne" },
+  { text: "Be someone who makes everyone feel like a someone.", author: "Unknown" },
+  { text: "What you do today can improve all your tomorrows.", author: "Ralph Marston" },
+  { text: "Success is getting what you want. Happiness is wanting what you get.", author: "W.P. Kinsella" },
+  { text: "Start each day with a grateful heart.", author: "Unknown" },
+  { text: "Be fearless in the pursuit of what sets your soul on fire.", author: "Jennifer Lee" },
+  { text: "One small positive thought can change your whole day.", author: "Unknown" },
+  { text: "With the right mindset, we can't lose, we can only learn.", author: "Jeff Davis" },
+  { text: "Don't look back — you're not going that way.", author: "Mary Engelbreit" },
+  { text: "Life is tough, but so are you.", author: "Unknown" },
+  { text: "I can and I will. Watch me.", author: "Unknown" },
+  { text: "The comeback is always stronger than the setback.", author: "Unknown" },
 ];
 
 // ── Custom quotes (user-added, persisted in localStorage + cloud) ──
@@ -612,44 +1555,35 @@ function spawnRecurringTasks(rules, existingTasks) {
 // ── Auth bar ──
 function AuthBar({ user, syncStatus, onSignIn, onSignOut, onExport }) {
   const statusColors = { offline: "#9ca3af", syncing: "#f59e0b", synced: "#22c55e", error: "#ef4444" };
-  const statusLabels = { offline: "Local only", syncing: "Syncing...", synced: "Synced", error: "Sync error" };
+  const statusLabels = { offline: "Local", syncing: "Syncing…", synced: "Synced", error: "Error" };
 
-  if (!FIREBASE_CONFIGURED) {
-    return (
-      <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#92400e" }}>
-        ☁️ <strong>Cloud sync available!</strong> Add your Firebase config to enable cross-device sync. See the setup guide for instructions.
-      </div>
-    );
-  }
+  if (!FIREBASE_CONFIGURED) return null;
 
   return (
-    <div className="auth-bar-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, background: "white", borderRadius: 10, padding: "8px 14px", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, padding: "4px 10px", background: "white", borderRadius: 8, border: "1px solid #f3f4f6", fontSize: 11 }}>
       {user ? (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            {user.photoURL && <img src={user.photoURL} alt="" style={{ width: 24, height: 24, borderRadius: "50%" }} />}
-            <span style={{ fontSize: 12, color: "#374151" }}>{user.displayName || user.email}</span>
-            <span className="sync-badge" style={{ background: statusColors[syncStatus] + "20", color: statusColors[syncStatus] }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColors[syncStatus], display: "inline-block" }}></span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {user.photoURL && <img src={user.photoURL} alt="" style={{ width: 18, height: 18, borderRadius: "50%" }} />}
+            <span style={{ color: "#374151", fontWeight: 500, maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.displayName || user.email}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color: statusColors[syncStatus], background: statusColors[syncStatus] + "15", padding: "1px 6px", borderRadius: 6, fontSize: 10 }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: statusColors[syncStatus], display: "inline-block" }}></span>
               {statusLabels[syncStatus]}
             </span>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={onExport} title="Export all data as JSON backup" style={{ fontSize: 11, color: "#6b7280", border: "1px solid #e5e7eb", background: "white", padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}>⬇ Export</button>
-            <button onClick={onSignOut} style={{ fontSize: 11, color: "#9ca3af", border: "1px solid #e5e7eb", background: "white", padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}>Sign out</button>
+          <div style={{ display: "flex", gap: 4 }}>
+            <button onClick={onExport} style={{ fontSize: 10, color: "#6b7280", border: "1px solid #e5e7eb", background: "white", padding: "2px 8px", borderRadius: 5, cursor: "pointer" }}>⬇ Export</button>
+            <button onClick={onSignOut} style={{ fontSize: 10, color: "#9ca3af", border: "1px solid #e5e7eb", background: "white", padding: "2px 8px", borderRadius: 5, cursor: "pointer" }}>Sign out</button>
           </div>
         </>
       ) : (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-          <span style={{ fontSize: 12, color: "#6b7280" }}>☁️ Sign in to sync tasks across devices</span>
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <button onClick={onExport} title="Export all data as JSON backup" style={{ fontSize: 11, color: "#6b7280", border: "1px solid #e5e7eb", background: "white", padding: "5px 10px", borderRadius: 8, cursor: "pointer" }}>⬇ Export</button>
-            <button onClick={onSignIn} style={{ fontSize: 12, background: "white", border: "1px solid #d1d5db", padding: "5px 14px", borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500, color: "#374151" }}>
-              <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-              Sign in with Google
-            </button>
+        <>
+          <span style={{ color: "#9ca3af" }}>☁️ Sign in to sync across devices</span>
+          <div style={{ display: "flex", gap: 4 }}>
+            <button onClick={onExport} style={{ fontSize: 10, color: "#6b7280", border: "1px solid #e5e7eb", background: "white", padding: "2px 8px", borderRadius: 5, cursor: "pointer" }}>⬇ Export</button>
+            <button onClick={onSignIn} style={{ fontSize: 10, background: "#3b82f6", color: "white", border: "none", padding: "3px 10px", borderRadius: 5, cursor: "pointer", fontWeight: 500 }}>Sign in</button>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -1736,7 +2670,7 @@ function TaskManager() {
   const [tasks, setTasks] = useState(loadTasks);
   const [input, setInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("manual");
+  const [sortBy, setSortBy] = useState("smart");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
   const [showCompletedSection, setShowCompletedSection] = useState(false);
@@ -1757,7 +2691,9 @@ function TaskManager() {
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [quoteText, setQuoteText] = useState("");
   const [quoteAuthor, setQuoteAuthor] = useState("");
-  const [showTodaySection, setShowTodaySection] = useState(true);
+  const [showTodaySection, setShowTodaySection] = useState(false);
+  const [quoteExpanded, setQuoteExpanded] = useState(false);
+  const [showInputExtras, setShowInputExtras] = useState(false);
   const inputRef = useRef(null);
 
   const cloudWriteRef = useRef(false); // prevent echo writes for tasks
@@ -1979,36 +2915,51 @@ function TaskManager() {
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8fafc, #eff6ff)", padding: 16 }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1f2937", margin: 0 }}>{activeTab === "tasks" ? "My Tasks" : activeTab === "goals" ? "My Goals" : "Dashboard"}</h1>
-          {activeTab === "tasks" && <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>{pendingCount} pending · {completedCount} completed{dueTodayCount > 0 ? ` · ${dueTodayCount} due today` : ""}{overdueCount > 0 ? <span style={{ color: "#dc2626" }}> · {overdueCount} overdue</span> : ""}</p>}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: "#1f2937", margin: 0 }}>{activeTab === "tasks" ? "📝 My Tasks" : activeTab === "goals" ? "🎯 My Goals" : "📊 Dashboard"}</h1>
+          {activeTab === "tasks" && <p style={{ fontSize: 11, color: "#6b7280", margin: 0 }}>{pendingCount} pending{overdueCount > 0 ? <span style={{ color: "#dc2626" }}> · {overdueCount} overdue</span> : ""}{dueTodayCount > 0 ? <span style={{ color: "#d97706" }}> · {dueTodayCount} due today</span> : ""}</p>}
         </div>
 
-        {/* Motivational quote — random on each visit */}
-        <div style={{ background: "linear-gradient(135deg, #f5f3ff, #eff6ff)", borderRadius: 12, padding: "14px 18px", marginBottom: 16, border: "1px solid #e0e7ff", textAlign: "center", position: "relative" }}>
-          <p style={{ margin: 0, fontSize: 13, color: "#374151", fontStyle: "italic", lineHeight: 1.5 }}>"{SESSION_QUOTE.text}"</p>
-          <p style={{ margin: "6px 0 0", fontSize: 11, color: "#6b7280", fontWeight: 500 }}>— {SESSION_QUOTE.author}</p>
-          <button onClick={() => setShowQuoteForm(prev => !prev)} title="Add your own quote" style={{ position: "absolute", top: 10, right: 12, background: "none", border: "none", cursor: "pointer", fontSize: 14, opacity: 0.5, transition: "opacity 0.15s" }} onMouseEnter={e => e.target.style.opacity = 1} onMouseLeave={e => e.target.style.opacity = 0.5}>✏️</button>
-          {showQuoteForm && (
-            <div style={{ marginTop: 12, background: "white", borderRadius: 10, padding: 12, border: "1px solid #e0e7ff", textAlign: "left" }} onClick={e => e.stopPropagation()}>
-              <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 600, color: "#4338ca" }}>Add your own quote</p>
-              <input autoFocus placeholder="Quote text..." value={quoteText} onChange={e => setQuoteText(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "8px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", marginBottom: 8 }} onKeyDown={e => { if (e.key === "Escape") setShowQuoteForm(false); }} />
-              <input placeholder="Author (optional)" value={quoteAuthor} onChange={e => setQuoteAuthor(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "8px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", marginBottom: 8 }} onKeyDown={e => { if (e.key === "Enter" && quoteText.trim()) { setCustomQuotes(prev => [...prev, { text: quoteText.trim(), author: quoteAuthor.trim() || "Me" }]); setQuoteText(""); setQuoteAuthor(""); setShowQuoteForm(false); } if (e.key === "Escape") setShowQuoteForm(false); }} />
-              <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button onClick={() => { if (!quoteText.trim()) return; setCustomQuotes(prev => [...prev, { text: quoteText.trim(), author: quoteAuthor.trim() || "Me" }]); setQuoteText(""); setQuoteAuthor(""); setShowQuoteForm(false); }} style={{ background: "#4338ca", color: "white", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>Add Quote</button>
-                  <button onClick={() => { setShowQuoteForm(false); setQuoteText(""); setQuoteAuthor(""); }} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "6px 14px", borderRadius: 8, fontSize: 11, cursor: "pointer" }}>Cancel</button>
+        {/* Motivational quote — slim collapsible strip */}
+        <div style={{ marginBottom: 8 }}>
+          <div
+            onClick={() => { if (!showQuoteForm) setQuoteExpanded(prev => !prev); }}
+            style={{ background: "linear-gradient(135deg, #f5f3ff, #eff6ff)", borderRadius: quoteExpanded ? "12px 12px 0 0" : 12, padding: "7px 14px", border: "1px solid #e0e7ff", display: "flex", alignItems: "center", gap: 8, cursor: "pointer", borderBottom: quoteExpanded ? "none" : "1px solid #e0e7ff" }}
+          >
+            <span style={{ fontSize: 14 }}>💡</span>
+            {!quoteExpanded && <span style={{ flex: 1, fontSize: 11, color: "#6b7280", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>"{SESSION_QUOTE.text.length > 60 ? SESSION_QUOTE.text.slice(0, 60) + "…" : SESSION_QUOTE.text}" — {SESSION_QUOTE.author}</span>}
+            {quoteExpanded && <span style={{ flex: 1, fontSize: 11, color: "#6b7280", fontWeight: 500 }}>Today's Quote</span>}
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <button onClick={e => { e.stopPropagation(); setShowQuoteForm(prev => !prev); setQuoteExpanded(true); }} title="Add your own quote" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, opacity: 0.5, padding: 0, lineHeight: 1 }}>✏️</button>
+              <span style={{ fontSize: 10, color: "#9ca3af", transition: "transform 0.2s", transform: quoteExpanded ? "rotate(180deg)" : "rotate(0deg)", display: "inline-block" }}>▼</span>
+            </div>
+          </div>
+          {quoteExpanded && (
+            <div style={{ background: "linear-gradient(135deg, #f5f3ff, #eff6ff)", border: "1px solid #e0e7ff", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "10px 14px", textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 13, color: "#374151", fontStyle: "italic", lineHeight: 1.5 }}>"{SESSION_QUOTE.text}"</p>
+              <p style={{ margin: "5px 0 0", fontSize: 11, color: "#6b7280", fontWeight: 500 }}>— {SESSION_QUOTE.author}</p>
+              {showQuoteForm && (
+                <div style={{ marginTop: 10, background: "white", borderRadius: 10, padding: 12, border: "1px solid #e0e7ff", textAlign: "left" }} onClick={e => e.stopPropagation()}>
+                  <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 600, color: "#4338ca" }}>Add your own quote</p>
+                  <input autoFocus placeholder="Quote text..." value={quoteText} onChange={e => setQuoteText(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "8px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", marginBottom: 8 }} onKeyDown={e => { if (e.key === "Escape") setShowQuoteForm(false); }} />
+                  <input placeholder="Author (optional)" value={quoteAuthor} onChange={e => setQuoteAuthor(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "8px 10px", fontSize: 12, outline: "none", boxSizing: "border-box", marginBottom: 8 }} onKeyDown={e => { if (e.key === "Enter" && quoteText.trim()) { setCustomQuotes(prev => [...prev, { text: quoteText.trim(), author: quoteAuthor.trim() || "Me" }]); setQuoteText(""); setQuoteAuthor(""); setShowQuoteForm(false); } if (e.key === "Escape") setShowQuoteForm(false); }} />
+                  <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => { if (!quoteText.trim()) return; setCustomQuotes(prev => [...prev, { text: quoteText.trim(), author: quoteAuthor.trim() || "Me" }]); setQuoteText(""); setQuoteAuthor(""); setShowQuoteForm(false); }} style={{ background: "#4338ca", color: "white", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>Add Quote</button>
+                      <button onClick={() => { setShowQuoteForm(false); setQuoteText(""); setQuoteAuthor(""); }} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "6px 14px", borderRadius: 8, fontSize: 11, cursor: "pointer" }}>Cancel</button>
+                    </div>
+                    {customQuotes.length > 0 && <span style={{ fontSize: 10, color: "#6b7280" }}>{customQuotes.length} custom quote{customQuotes.length !== 1 ? "s" : ""} saved</span>}
+                  </div>
                 </div>
-                {customQuotes.length > 0 && <span style={{ fontSize: 10, color: "#6b7280" }}>{customQuotes.length} custom quote{customQuotes.length !== 1 ? "s" : ""} saved</span>}
-              </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Tab switcher */}
-        <div style={{ display: "flex", gap: 0, marginBottom: 16, background: "#f1f5f9", borderRadius: 12, padding: 4 }}>
+        <div style={{ display: "flex", gap: 0, marginBottom: 8, background: "#f1f5f9", borderRadius: 10, padding: 3 }}>
           {[{ key: "tasks", icon: "📝", label: "Tasks" }, { key: "goals", icon: "🎯", label: "Goals" }, { key: "dashboard", icon: "📊", label: "Dashboard" }].map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s", background: activeTab === tab.key ? "white" : "transparent", color: activeTab === tab.key ? "#1f2937" : "#6b7280", boxShadow: activeTab === tab.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>{tab.icon} {tab.label}</button>
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s", background: activeTab === tab.key ? "white" : "transparent", color: activeTab === tab.key ? "#1f2937" : "#6b7280", boxShadow: activeTab === tab.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>{tab.icon} {tab.label}</button>
           ))}
         </div>
 
@@ -2022,68 +2973,55 @@ function TaskManager() {
         {activeTab === "tasks" && (
         <>
         {/* Category tabs */}
-        <div style={{ marginBottom: 16 }}><CategoryTabs active={filterCategory} onChange={setFilterCategory} counts={categoryCounts} /></div>
+        <div style={{ marginBottom: 8 }}><CategoryTabs active={filterCategory} onChange={setFilterCategory} counts={categoryCounts} /></div>
 
         {/* Input */}
-        <div style={{ background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 12, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-          <div className="input-bar-row" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 12, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 8px", flexShrink: 0 }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
-            <div style={{ display: "flex", gap: 8, flex: 1, minWidth: 0 }}>
-              <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 14px", fontSize: 13, outline: "none", minWidth: 0, boxSizing: "border-box" }} placeholder="Type a task..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") addTask(); }} />
-              <button onClick={addTask} style={{ background: "#3b82f6", color: "white", border: "none", padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
-            </div>
+        <div style={{ background: "white", borderRadius: 10, border: "1px solid #e5e7eb", padding: "8px 10px", marginBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+          <div className="input-bar-row" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 7, padding: "6px 6px", flexShrink: 0 }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+            <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 7, padding: "6px 12px", fontSize: 13, outline: "none", minWidth: 0, boxSizing: "border-box" }} placeholder="Type a task... (!! high, ! med, ~ low)" value={input} onChange={e => setInput(e.target.value)} onFocus={() => setShowInputExtras(true)} onKeyDown={e => { if (e.key === "Enter") { addTask(); setShowInputExtras(false); } if (e.key === "Escape") { setShowInputExtras(false); } }} />
+            <button onClick={() => setShowInputExtras(prev => !prev)} title="More options" style={{ background: showInputExtras ? "#eff6ff" : "none", border: `1px solid ${showInputExtras ? "#bfdbfe" : "#e5e7eb"}`, borderRadius: 7, padding: "6px 8px", fontSize: 12, color: showInputExtras ? "#3b82f6" : "#9ca3af", cursor: "pointer", flexShrink: 0 }}>⚙</button>
+            <button onClick={() => { addTask(); setShowInputExtras(false); }} style={{ background: "#3b82f6", color: "white", border: "none", padding: "6px 14px", borderRadius: 7, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Priority:</span>
-              <PriorityPicker value={newPriority} onChange={setNewPriority} />
+          {showInputExtras && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, flexWrap: "wrap", paddingTop: 8, borderTop: "1px solid #f3f4f6" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 10, color: "#9ca3af", fontWeight: 600 }}>Priority:</span>
+                <PriorityPicker value={newPriority} onChange={setNewPriority} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 10, color: "#9ca3af", fontWeight: 600 }}>Due:</span>
+                <input type="date" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} />
+                {newDueDate && <button onClick={() => setNewDueDate("")} style={{ fontSize: 11, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", padding: 0 }}>✕</button>}
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500 }}>Due:</span>
-              <input type="date" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} />
-              {newDueDate && <button onClick={() => setNewDueDate("")} style={{ fontSize: 11, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", padding: 0 }}>✕</button>}
-            </div>
-          </div>
-        </div>
-
-        {/* Search bar */}
-        <div style={{ position: "relative", marginBottom: 10 }}>
-          <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "#9ca3af", pointerEvents: "none" }}>🔍</span>
-          <input
-            style={{ width: "100%", background: "white", border: "1px solid #e5e7eb", borderRadius: 10, padding: "8px 36px 8px 36px", fontSize: 13, outline: "none", boxSizing: "border-box", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
-            placeholder="Search tasks..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery("")} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#9ca3af", padding: 0 }}>✕</button>
           )}
         </div>
 
-        {/* Controls */}
-        <div className="controls-row" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Sort:</label>
-              <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 8px" }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                <option value="manual">Manual (Drag)</option><option value="priority">Priority</option><option value="category">Category</option><option value="dueDate">Due Date</option><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="smart">Smart (Score)</option>
-              </select>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <label style={{ fontSize: 11, color: "#6b7280", fontWeight: 600 }}>Priority:</label>
-              <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 8px" }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
-                <option value="all">All</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-              </select>
-            </div>
+        {/* Search + Controls — single compact row */}
+        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+          <div style={{ position: "relative", flex: 1, minWidth: 140 }}>
+            <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", fontSize: 12, color: "#9ca3af", pointerEvents: "none" }}>🔍</span>
+            <input
+              style={{ width: "100%", background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 28px 6px 28px", fontSize: 12, outline: "none", boxSizing: "border-box" }}
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && <button onClick={() => setSearchQuery("")} style={{ position: "absolute", right: 7, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#9ca3af", padding: 0 }}>✕</button>}
           </div>
-          <div className="controls-buttons" style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
-            <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Smart Suggest</button>
-          </div>
+          <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 6px", flexShrink: 0 }} value={sortBy} onChange={e => setSortBy(e.target.value)} title="Sort by">
+            <option value="manual">⠿ Manual</option><option value="priority">⚡ Priority</option><option value="category">📁 Category</option><option value="dueDate">📅 Due Date</option><option value="newest">🆕 Newest</option><option value="oldest">🕰 Oldest</option><option value="smart">★ Smart</option>
+          </select>
+          <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 6px", flexShrink: 0 }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)} title="Filter priority">
+            <option value="all">🎯 All</option><option value="high">🔴 High</option><option value="medium">🟡 Med</option><option value="low">🟢 Low</option>
+          </select>
+          <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 10px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>🔄</button>
+          <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>★ Suggest</button>
         </div>
 
         {sortBy === "manual" && sorted.length > 1 && (
-          <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#15803d", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 16 }}>⠿</span> Drag the handle to reorder tasks</div>
+          <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 12, color: "#15803d", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 16 }}>⠿</span> Drag the handle to reorder tasks</div>
         )}
 
         {/* Suggestion banner */}
