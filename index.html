@@ -1530,11 +1530,11 @@ function spawnRecurringTasks(rules, existingTasks) {
   rules.forEach(rule => {
     if (!shouldSpawnToday(rule)) return;
     const logKey = rule.id + "_" + today;
+    if (log[logKey] === "deleted") return; // intentionally deleted today — don't re-spawn
     if (log[logKey]) {
-      // Cross-check: if dedup log says spawned but no matching task exists, re-spawn
+      // Cross-check: if dedup log says spawned but no matching task exists, it's an orphan — re-spawn
       const taskExists = existingTasks.some(t => t.recurringRuleId === rule.id && t.createdAt === today);
       if (taskExists) return;
-      // Orphaned dedup entry — task was never actually created, allow re-spawn
     }
     newTasks.push({
       id: generateId(),
@@ -2833,6 +2833,12 @@ function TaskManager() {
   const deleteTask = (id) => {
     const task = tasks.find(t => t.id === id);
     if (task && !task.completed && !confirm(`Delete "${task.text}"?`)) return;
+    // If it's a recurring task, mark today's dedup log as "deleted" so it doesn't re-spawn
+    if (task && task.recurringRuleId) {
+      const log = loadRecurLog();
+      log[task.recurringRuleId + "_" + todayStr()] = "deleted";
+      saveRecurLog(log);
+    }
     setTasks(prev => prev.filter(t => t.id !== id));
   };
   const clearCompleted = () => {
