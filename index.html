@@ -1499,7 +1499,7 @@ function loadRecurLog() {
       const pruned = {};
       Object.keys(log).forEach(key => {
         const datepart = key.split("_").pop();
-        if (datepart >= cutoffStr) pruned[key] = true;
+        if (datepart >= cutoffStr) pruned[key] = log[key]; // preserve "deleted" vs true
       });
       return pruned;
     }
@@ -2784,7 +2784,15 @@ function TaskManager() {
   useEffect(() => {
     setTasks(prev => {
       const spawned = spawnRecurringTasks(recurringRules, prev);
-      return spawned.length > 0 ? [...prev, ...spawned] : prev;
+      if (spawned.length === 0) return prev;
+      // When a fresh instance is spawned today, remove any stale incomplete instances
+      // of the same rule from previous days — keep only the latest
+      const spawnedRuleIds = new Set(spawned.map(t => t.recurringRuleId));
+      const cleaned = prev.filter(t => {
+        if (!t.recurringRuleId || !spawnedRuleIds.has(t.recurringRuleId)) return true;
+        return t.completed; // keep completed history, drop old pending duplicates
+      });
+      return [...cleaned, ...spawned];
     });
   }, [recurringRules]);
 
