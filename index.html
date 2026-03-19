@@ -2976,22 +2976,22 @@ function TaskManager() {
         <div style={{ marginBottom: 8 }}><CategoryTabs active={filterCategory} onChange={setFilterCategory} counts={categoryCounts} /></div>
 
         {/* Input */}
-        <div style={{ background: "white", borderRadius: 10, border: "1px solid #e5e7eb", padding: "8px 10px", marginBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-          <div className="input-bar-row" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 7, padding: "6px 6px", flexShrink: 0 }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
-            <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 7, padding: "6px 12px", fontSize: 13, outline: "none", minWidth: 0, boxSizing: "border-box" }} placeholder="Type a task... (!! high, ! med, ~ low)" value={input} onChange={e => setInput(e.target.value)} onFocus={() => setShowInputExtras(true)} onKeyDown={e => { if (e.key === "Enter") { addTask(); setShowInputExtras(false); } if (e.key === "Escape") { setShowInputExtras(false); } }} />
-            <button onClick={() => setShowInputExtras(prev => !prev)} title="More options" style={{ background: showInputExtras ? "#eff6ff" : "none", border: `1px solid ${showInputExtras ? "#bfdbfe" : "#e5e7eb"}`, borderRadius: 7, padding: "6px 8px", fontSize: 12, color: showInputExtras ? "#3b82f6" : "#9ca3af", cursor: "pointer", flexShrink: 0 }}>⚙</button>
-            <button onClick={() => { addTask(); setShowInputExtras(false); }} style={{ background: "#3b82f6", color: "white", border: "none", padding: "6px 14px", borderRadius: 7, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
+        <div style={{ background: "white", borderRadius: 10, border: `1px solid ${showInputExtras ? "#bfdbfe" : "#e5e7eb"}`, padding: "6px 8px", marginBottom: 8, boxShadow: showInputExtras ? "0 0 0 2px #eff6ff" : "0 1px 3px rgba(0,0,0,0.06)", transition: "border-color 0.15s, box-shadow 0.15s" }}
+          onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setShowInputExtras(false); }}>
+          <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+            <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 5px", flexShrink: 0, color: "#374151" }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+            <input ref={inputRef} style={{ flex: 1, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 6, padding: "5px 10px", fontSize: 13, outline: "none", minWidth: 0, boxSizing: "border-box" }} placeholder="Add a task… (!! high · ! med · ~ low)" value={input} onChange={e => setInput(e.target.value)} onFocus={() => setShowInputExtras(true)} onKeyDown={e => { if (e.key === "Enter") { addTask(); setShowInputExtras(false); } if (e.key === "Escape") { setShowInputExtras(false); inputRef.current && inputRef.current.blur(); } }} />
+            <button onClick={() => { addTask(); setShowInputExtras(false); }} style={{ background: "#3b82f6", color: "white", border: "none", padding: "5px 13px", borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0 }}>Add</button>
           </div>
           {showInputExtras && (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, flexWrap: "wrap", paddingTop: 8, borderTop: "1px solid #f3f4f6" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6, paddingTop: 6, borderTop: "1px dashed #e5e7eb", flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ fontSize: 10, color: "#9ca3af", fontWeight: 600 }}>Priority:</span>
                 <PriorityPicker value={newPriority} onChange={setNewPriority} />
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ fontSize: 10, color: "#9ca3af", fontWeight: 600 }}>Due:</span>
-                <input type="date" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} />
+                <input type="date" value={newDueDate} onChange={e => setNewDueDate(e.target.value)} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "3px 6px" }} />
                 {newDueDate && <button onClick={() => setNewDueDate("")} style={{ fontSize: 11, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", padding: 0 }}>✕</button>}
               </div>
             </div>
