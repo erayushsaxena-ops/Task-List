@@ -435,7 +435,9 @@ function scoreTask(task) {
   let score = 0;
   score += (2 - PRIORITY_ORDER[task.priority]) * 40;
   if (task.dueDate) {
-    const daysUntilDue = Math.floor((new Date(task.dueDate) - Date.now()) / 86400000);
+    const todayMidnight = new Date(todayStr() + "T00:00:00");
+    const dueMidnight = new Date(task.dueDate + "T00:00:00");
+    const daysUntilDue = Math.floor((dueMidnight - todayMidnight) / 86400000);
     if (daysUntilDue < 0) score += 100;
     else if (daysUntilDue <= 1) score += 60;
     else if (daysUntilDue <= 3) score += 30;
@@ -448,7 +450,18 @@ function scoreTask(task) {
 function loadTasks() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const tasks = JSON.parse(saved);
+      // Auto-delete completed tasks older than 8 days
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 8);
+      const cutoffStr = localDateStr(cutoff);
+      return tasks.filter(t => {
+        if (!t.completed) return true;
+        if (!t.completedAt) return true; // keep legacy tasks with no completedAt
+        return t.completedAt > cutoffStr;
+      });
+    }
   } catch (e) {}
   return [
     { id: generateId(), text: "Review quarterly report", priority: "high", category: "work", dueDate: "2026-03-18", completed: false, createdAt: "2026-03-14" },
@@ -597,7 +610,7 @@ function spawnRecurringTasks(rules, existingTasks) {
 }
 
 // ── Auth bar ──
-function AuthBar({ user, syncStatus, onSignIn, onSignOut }) {
+function AuthBar({ user, syncStatus, onSignIn, onSignOut, onExport }) {
   const statusColors = { offline: "#9ca3af", syncing: "#f59e0b", synced: "#22c55e", error: "#ef4444" };
   const statusLabels = { offline: "Local only", syncing: "Syncing...", synced: "Synced", error: "Sync error" };
 
@@ -621,15 +634,21 @@ function AuthBar({ user, syncStatus, onSignIn, onSignOut }) {
               {statusLabels[syncStatus]}
             </span>
           </div>
-          <button onClick={onSignOut} style={{ fontSize: 11, color: "#9ca3af", border: "1px solid #e5e7eb", background: "white", padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}>Sign out</button>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={onExport} title="Export all data as JSON backup" style={{ fontSize: 11, color: "#6b7280", border: "1px solid #e5e7eb", background: "white", padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}>⬇ Export</button>
+            <button onClick={onSignOut} style={{ fontSize: 11, color: "#9ca3af", border: "1px solid #e5e7eb", background: "white", padding: "3px 10px", borderRadius: 6, cursor: "pointer" }}>Sign out</button>
+          </div>
         </>
       ) : (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
           <span style={{ fontSize: 12, color: "#6b7280" }}>☁️ Sign in to sync tasks across devices</span>
-          <button onClick={onSignIn} style={{ fontSize: 12, background: "white", border: "1px solid #d1d5db", padding: "5px 14px", borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500, color: "#374151" }}>
-            <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Sign in with Google
-          </button>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <button onClick={onExport} title="Export all data as JSON backup" style={{ fontSize: 11, color: "#6b7280", border: "1px solid #e5e7eb", background: "white", padding: "5px 10px", borderRadius: 8, cursor: "pointer" }}>⬇ Export</button>
+            <button onClick={onSignIn} style={{ fontSize: 12, background: "white", border: "1px solid #d1d5db", padding: "5px 14px", borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500, color: "#374151" }}>
+              <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              Sign in with Google
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -646,6 +665,13 @@ function RecurringModal({ show, onClose, rules, onSave }) {
   const [newMonthDays, setNewMonthDays] = useState([1]);
   const [newPriority, setNewPriority] = useState("medium");
   const [newCategory, setNewCategory] = useState("work");
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [editType, setEditType] = useState("weekly");
+  const [editDays, setEditDays] = useState([1]);
+  const [editMonthDays, setEditMonthDays] = useState([1]);
+  const [editPriority, setEditPriority] = useState("medium");
+  const [editCategory, setEditCategory] = useState("work");
 
   useEffect(() => { setLocalRules(rules); }, [rules]);
 
@@ -665,6 +691,32 @@ function RecurringModal({ show, onClose, rules, onSave }) {
 
   const toggleEnabled = (id) => { const updated = localRules.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r); setLocalRules(updated); onSave(updated); };
   const deleteRule = (id) => { const rule = localRules.find(r => r.id === id); if (rule && !confirm(`Delete recurring task "${rule.text}"?`)) return; const updated = localRules.filter(r => r.id !== id); setLocalRules(updated); onSave(updated); };
+
+  const startEdit = (rule) => {
+    setEditingId(rule.id);
+    setEditText(rule.text);
+    setEditType(rule.type);
+    setEditDays(rule.days || []);
+    setEditMonthDays(rule.monthDays || []);
+    setEditPriority(rule.priority);
+    setEditCategory(rule.category);
+  };
+
+  const saveEdit = () => {
+    if (!editText.trim()) return;
+    const updated = localRules.map(r => r.id === editingId ? {
+      ...r,
+      text: editText.trim(),
+      type: editType,
+      days: editType === "weekly" ? editDays : [],
+      monthDays: editType === "monthly" ? editMonthDays : [],
+      priority: editPriority,
+      category: editCategory,
+    } : r);
+    setLocalRules(updated);
+    onSave(updated);
+    setEditingId(null);
+  };
 
   const describeSchedule = (rule) => {
     if (rule.type === "daily") return "Every day";
@@ -705,9 +757,26 @@ function RecurringModal({ show, onClose, rules, onSave }) {
                   </div>
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <button onClick={() => toggleEnabled(rule.id)} style={{ fontSize: 11, background: rule.enabled ? "#dcfce7" : "#fee2e2", color: rule.enabled ? "#16a34a" : "#dc2626", border: "none", padding: "3px 8px", borderRadius: 6, cursor: "pointer" }}>{rule.enabled ? "On" : "Off"}</button>
+                    <button onClick={() => startEdit(rule)} style={{ fontSize: 11, background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "3px 8px", borderRadius: 6, cursor: "pointer" }}>Edit</button>
                     <button onClick={() => deleteRule(rule.id)} style={{ fontSize: 13, color: "#9ca3af", border: "none", background: "none", cursor: "pointer" }}>✕</button>
                   </div>
                 </div>
+                {editingId === rule.id && (
+                  <div style={{ borderTop: "1px solid #e5e7eb", padding: "10px 0 4px", marginTop: 8 }}>
+                    <input autoFocus value={editText} onChange={e => setEditText(e.target.value)} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "7px 10px", fontSize: 13, outline: "none", boxSizing: "border-box", marginBottom: 8 }} onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingId(null); }} />
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                      <select value={editType} onChange={e => setEditType(e.target.value)} style={{ fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px" }}>{RECUR_TYPES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}</select>
+                      <select value={editCategory} onChange={e => setEditCategory(e.target.value)} style={{ fontSize: 12, border: "1px solid #d1d5db", borderRadius: 6, padding: "4px 8px" }}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
+                    </div>
+                    {editType === "weekly" && <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>{DAY_NAMES.map((name, i) => (<button key={i} className={`day-chip ${editDays.includes(i) ? "active" : ""}`} onClick={() => setEditDays(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i].sort())}>{name}</button>))}</div>}
+                    {editType === "monthly" && <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 8 }}>{Array.from({ length: 31 }, (_, i) => i + 1).map(d => (<button key={d} className={`day-chip monthly ${editMonthDays.includes(d) ? "active" : ""}`} onClick={() => setEditMonthDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort())}>{d}</button>))}</div>}
+                    <PriorityPicker value={editPriority} onChange={setEditPriority} />
+                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                      <button onClick={saveEdit} style={{ background: "#3b82f6", color: "white", border: "none", padding: "5px 14px", borderRadius: 7, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Save</button>
+                      <button onClick={() => setEditingId(null)} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "5px 12px", borderRadius: 7, fontSize: 12, cursor: "pointer" }}>Cancel</button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -835,6 +904,8 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
   const [recurPriority, setRecurPriority] = useState("medium");
   const [showTargetEditor, setShowTargetEditor] = useState(false);
   const [targetDir, setTargetDir] = useState(goal.targetDirection || "increase");
+  const [updatingValue, setUpdatingValue] = useState(false);
+  const [updateValueInput, setUpdateValueInput] = useState("");
 
   const lv = GOAL_LEVELS[levelIdx];
   const nextLevel = levelIdx < GOAL_LEVELS.length - 1 ? GOAL_LEVELS[levelIdx + 1] : null;
@@ -905,10 +976,17 @@ function GoalNode({ goal, level, levelIdx, allGoals, onToggle, onDelete, onEdit,
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, alignItems: "center" }}>
                     <span style={{ fontSize: 10, color: "#b45309" }}>{pct}% done {isDecrease && goal.startValue ? `(started at ${goal.startValue} ${goal.targetUnit || ""})` : ""}</span>
-                    <button onClick={() => {
-                      const val = prompt("Update current value:", goal.currentValue || 0);
-                      if (val !== null && !isNaN(Number(val))) onUpdateGoal(goal.id, { currentValue: Number(val) });
-                    }} style={{ fontSize: 9, background: "white", color: "#d97706", border: "1px solid #fcd34d", padding: "1px 6px", borderRadius: 4, cursor: "pointer" }}>Update</button>
+                    {updatingValue ? (
+                      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                        <input autoFocus type="number" value={updateValueInput} onChange={e => setUpdateValueInput(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Enter" && !isNaN(Number(updateValueInput))) { onUpdateGoal(goal.id, { currentValue: Number(updateValueInput) }); setUpdatingValue(false); } if (e.key === "Escape") setUpdatingValue(false); }}
+                          style={{ width: 60, border: "1px solid #fcd34d", borderRadius: 4, padding: "2px 6px", fontSize: 11, outline: "none" }} placeholder={String(goal.currentValue || 0)} />
+                        <button onClick={() => { if (!isNaN(Number(updateValueInput))) { onUpdateGoal(goal.id, { currentValue: Number(updateValueInput) }); } setUpdatingValue(false); }} style={{ fontSize: 9, background: "#d97706", color: "white", border: "none", padding: "2px 7px", borderRadius: 4, cursor: "pointer" }}>✓</button>
+                        <button onClick={() => setUpdatingValue(false)} style={{ fontSize: 9, background: "white", color: "#9ca3af", border: "1px solid #e5e7eb", padding: "2px 5px", borderRadius: 4, cursor: "pointer" }}>✕</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setUpdateValueInput(String(goal.currentValue || 0)); setUpdatingValue(true); }} style={{ fontSize: 9, background: "white", color: "#d97706", border: "1px solid #fcd34d", padding: "1px 6px", borderRadius: 4, cursor: "pointer" }}>Update</button>
+                    )}
                   </div>
                 </div>
               );
@@ -1575,8 +1653,12 @@ function Dashboard({ tasks, goals, recurringRules }) {
 function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging, dragOverPos, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop, sortBy }) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
+  const [showNotes, setShowNotes] = useState(false);
+  const [editNotes, setEditNotes] = useState(false);
+  const [notesText, setNotesText] = useState(task.notes || "");
   const pColors = PRIORITY_COLORS[task.priority];
   const cardRef = useRef(null);
+  const isOverdue = !task.completed && task.dueDate && task.dueDate < todayStr();
 
   const handleSave = () => { if (editText.trim()) onUpdate(task.id, { text: editText.trim() }); setEditing(false); };
 
@@ -1593,7 +1675,7 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
       onDragOver={(e) => { if (!isManual) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; const rect = cardRef.current.getBoundingClientRect(); onDragOver(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
       onDragLeave={() => onDragLeave(task.id)}
       onDrop={(e) => { e.preventDefault(); if (!isManual) return; const rect = cardRef.current.getBoundingClientRect(); onDrop(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
-      style={{ background: "white", borderLeft: `4px solid ${pColors.badge}`, opacity: task.completed ? 0.5 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: 12 }}>
+      style={{ background: isOverdue ? "#fff5f5" : "white", borderLeft: `4px solid ${isOverdue ? "#ef4444" : pColors.badge}`, opacity: task.completed ? 0.5 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: 12 }}>
       <div className="task-card-inner" style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
         {isManual && !task.completed && <span className="drag-handle" title="Drag to reorder">⠿</span>}
         <button onClick={() => onToggle(task.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: task.completed ? "#9ca3af" : "#d1d5db", background: task.completed ? "#9ca3af" : "transparent", color: task.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{task.completed && "✓"}</button>
@@ -1619,6 +1701,31 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
             <input type="date" style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} value={task.dueDate || ""} onChange={e => onUpdate(task.id, { dueDate: e.target.value })} />
             <button onClick={() => onDelete(task.id)} style={{ color: "#dc2626", border: "1px solid #fecaca", background: "#fef2f2", cursor: "pointer", padding: "3px 8px", borderRadius: 6, fontSize: 11 }}>Delete</button>
           </div>
+          {/* Notes */}
+          {!task.completed && (
+            <div style={{ marginTop: 4 }}>
+              <button onClick={() => setShowNotes(prev => !prev)} style={{ fontSize: 10, color: task.notes ? "#4338ca" : "#9ca3af", background: task.notes ? "#e0e7ff" : "none", border: task.notes ? "1px solid #c7d2fe" : "none", padding: "2px 8px", borderRadius: 6, cursor: "pointer" }}>
+                {task.notes ? `📝 Note` : `+ Add note`}
+              </button>
+              {showNotes && (
+                <div style={{ marginTop: 6 }}>
+                  {editNotes ? (
+                    <div>
+                      <textarea value={notesText} onChange={e => setNotesText(e.target.value)} rows={3} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "6px 10px", fontSize: 12, outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Add notes, links, or context..." autoFocus />
+                      <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                        <button onClick={() => { onUpdate(task.id, { notes: notesText.trim() || undefined }); setEditNotes(false); }} style={{ background: "#3b82f6", color: "white", border: "none", padding: "4px 12px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Save</button>
+                        <button onClick={() => { setNotesText(task.notes || ""); setEditNotes(false); }} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div onClick={() => setEditNotes(true)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "8px 10px", fontSize: 12, color: task.notes ? "#374151" : "#9ca3af", cursor: "pointer", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                      {task.notes || "Click to add notes..."}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1628,6 +1735,7 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
 function TaskManager() {
   const [tasks, setTasks] = useState(loadTasks);
   const [input, setInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("manual");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
@@ -1649,6 +1757,7 @@ function TaskManager() {
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [quoteText, setQuoteText] = useState("");
   const [quoteAuthor, setQuoteAuthor] = useState("");
+  const [showTodaySection, setShowTodaySection] = useState(true);
   const inputRef = useRef(null);
 
   const cloudWriteRef = useRef(false); // prevent echo writes for tasks
@@ -1672,8 +1781,13 @@ function TaskManager() {
   useEffect(() => {
     if (!user) return;
     const unsub1 = listenToCloud("tasks", (data) => {
-      const arr = Array.isArray(data) ? data : Object.values(data || {});
+      let arr = Array.isArray(data) ? data : Object.values(data || {});
       if (arr.length > 0) {
+        // Apply same 8-day completed-task cleanup as loadTasks()
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 8);
+        const cutoffStr = localDateStr(cutoff);
+        arr = arr.filter(t => !t.completed || !t.completedAt || t.completedAt > cutoffStr);
         cloudWriteRef.current = true;
         setTasks(arr);
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e) {}
@@ -1732,8 +1846,10 @@ function TaskManager() {
 
   // Spawn recurring tasks on load and whenever rules change
   useEffect(() => {
-    const spawned = spawnRecurringTasks(recurringRules, tasks);
-    if (spawned.length > 0) setTasks(prev => [...prev, ...spawned]);
+    setTasks(prev => {
+      const spawned = spawnRecurringTasks(recurringRules, prev);
+      return spawned.length > 0 ? [...prev, ...spawned] : prev;
+    });
   }, [recurringRules]);
 
   const handleSaveRules = (updated) => {
@@ -1771,7 +1887,12 @@ function TaskManager() {
 
   const toggleTask = (id) => {
     const today = todayStr();
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? today : null, dueDate: !t.completed ? today : t.dueDate } : t));
+    setTasks(prev => prev.map(t => t.id === id ? {
+      ...t,
+      completed: !t.completed,
+      completedAt: !t.completed ? today : null,
+      dueDate: !t.completed && !t.dueDate ? today : t.dueDate
+    } : t));
   };
   const deleteTask = (id) => {
     const task = tasks.find(t => t.id === id);
@@ -1785,6 +1906,22 @@ function TaskManager() {
     setTasks(prev => prev.filter(t => !t.completed));
   };
   const updateTask = (id, updates) => setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  const exportData = () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      tasks,
+      goals,
+      recurringRules,
+      customQuotes,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tasks-backup-${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleDragStart = useCallback((id) => setDragId(id), []);
   const handleDragEnd = useCallback(() => { setDragId(null); setDragOverState({}); }, []);
@@ -1813,6 +1950,10 @@ function TaskManager() {
     if (filterCategory !== "all") filtered = filtered.filter(t => t.category === filterCategory);
     if (filterPriority !== "all") filtered = filtered.filter(t => t.priority === filterPriority);
     filtered = filtered.filter(t => !t.completed);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(t => t.text.toLowerCase().includes(q) || (t.notes || "").toLowerCase().includes(q));
+    }
     if (sortBy === "priority") filtered.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
     else if (sortBy === "dueDate") filtered.sort((a, b) => { if (!a.dueDate && !b.dueDate) return 0; if (!a.dueDate) return 1; if (!b.dueDate) return -1; return new Date(a.dueDate) - new Date(b.dueDate); });
     else if (sortBy === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1872,7 +2013,7 @@ function TaskManager() {
         </div>
 
         {/* Auth bar */}
-        <AuthBar user={user} syncStatus={syncStatus} onSignIn={signIn} onSignOut={signOut} />
+        <AuthBar user={user} syncStatus={syncStatus} onSignIn={signIn} onSignOut={signOut} onExport={exportData} />
 
         {activeTab === "dashboard" && (
           <Dashboard tasks={tasks} goals={goals} recurringRules={recurringRules} />
@@ -1905,6 +2046,20 @@ function TaskManager() {
           </div>
         </div>
 
+        {/* Search bar */}
+        <div style={{ position: "relative", marginBottom: 10 }}>
+          <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "#9ca3af", pointerEvents: "none" }}>🔍</span>
+          <input
+            style={{ width: "100%", background: "white", border: "1px solid #e5e7eb", borderRadius: 10, padding: "8px 36px 8px 36px", fontSize: 13, outline: "none", boxSizing: "border-box", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#9ca3af", padding: 0 }}>✕</button>
+          )}
+        </div>
+
         {/* Controls */}
         <div className="controls-row" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -1923,7 +2078,7 @@ function TaskManager() {
           </div>
           <div className="controls-buttons" style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🔄 Recurring</button>
-            <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Suggest Next</button>
+            <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>★ Smart Suggest</button>
           </div>
         </div>
 
@@ -1943,12 +2098,47 @@ function TaskManager() {
                 <span style={{ fontSize: 10, color: "#93aed4", background: "#dbeafe", padding: "2px 8px", borderRadius: 8 }}>Score: {currentSuggestion.score}</span>
               </div>
               <p onClick={() => { const el = document.getElementById(`task-${suggestedTask.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #60a5fa, 0 0 12px rgba(96,165,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); } }} style={{ fontSize: 14, color: "#1d4ed8", margin: 0, fontWeight: 500, cursor: "pointer" }}>★ {suggestedTask.text}<span style={{ marginLeft: 8 }}><CategoryBadge category={suggestedTask.category} /></span> <span style={{ fontSize: 10, color: "#93aed4" }}>↓ tap to scroll</span></p>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                {suggestionIndex > 0 && <button onClick={() => setSuggestionIndex(prev => prev - 1)} style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>← Previous</button>}
                 {!isLast && <button onClick={skipSuggestion} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>Skip → Show Next</button>}
                 {isLast && suggestionList.length > 1 && <button onClick={() => setSuggestionIndex(0)} style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd", padding: "5px 14px", borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: "pointer" }}>↻ Back to Top Pick</button>}
                 <button onClick={dismissSuggestions} style={{ background: "transparent", color: "#93c5fd", border: "1px solid #bfdbfe", padding: "5px 14px", borderRadius: 8, fontSize: 12, cursor: "pointer" }}>Dismiss</button>
                 {isLast && <span style={{ fontSize: 11, color: "#93aed4", marginLeft: 4 }}>No more suggestions</span>}
               </div>
+            </div>
+          );
+        })()}
+
+        {/* Today's Focus Section */}
+        {(() => {
+          const todayTasks = sorted.filter(t => t.dueDate === todayDate || t.recurringRuleId);
+          if (todayTasks.length === 0) return null;
+          const dueTodayTasks = sorted.filter(t => t.dueDate === todayDate && !t.recurringRuleId);
+          const recurringToday = sorted.filter(t => t.recurringRuleId);
+          return (
+            <div style={{ marginBottom: 16 }}>
+              <button onClick={() => setShowTodaySection(prev => !prev)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(135deg, #fefce8, #fffbeb)", border: "1px solid #fcd34d", borderRadius: 10, padding: "10px 14px", cursor: "pointer", marginBottom: showTodaySection ? 8 : 0 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#92400e" }}>⚡ Today's Focus ({todayTasks.length})</span>
+                <span style={{ fontSize: 12, color: "#d97706", transition: "transform 0.2s", transform: showTodaySection ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+              </button>
+              {showTodaySection && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingLeft: 4 }}>
+                  {dueTodayTasks.length > 0 && <p style={{ fontSize: 10, color: "#b45309", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>📅 Due today</p>}
+                  {dueTodayTasks.map(task => (
+                    <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #fbbf24, 0 0 12px rgba(251,191,36,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: "1px solid #fde68a", borderLeft: "3px solid #f59e0b", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
+                      <CategoryBadge category={task.category} />
+                    </div>
+                  ))}
+                  {recurringToday.length > 0 && <p style={{ fontSize: 10, color: "#7c3aed", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>🔄 Recurring today</p>}
+                  {recurringToday.map(task => (
+                    <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #a78bfa, 0 0 12px rgba(167,139,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: "1px solid #e9d5ff", borderLeft: "3px solid #7c3aed", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
+                      <CategoryBadge category={task.category} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}
