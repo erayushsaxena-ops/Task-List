@@ -18,7 +18,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
   .drag-handle { cursor: grab; color: #c0c0c0; user-select: none; font-size: 16px; line-height: 1; padding: 2px 4px; transition: color 0.15s; }
   .drag-handle:hover { color: #888; }
   .drag-handle:active { cursor: grabbing; }
@@ -2593,14 +2593,15 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
   const pColors = PRIORITY_COLORS[task.priority];
   const cardRef = useRef(null);
   const isOverdue = !task.completed && task.dueDate && task.dueDate < todayStr();
+  const isManual = sortBy === "manual";
 
   const handleSave = () => { if (editText.trim()) onUpdate(task.id, { text: editText.trim() }); setEditing(false); };
+  const cyclePriority = () => { const o = ["low","medium","high"]; onUpdate(task.id, { priority: o[(o.indexOf(task.priority)+1)%3] }); };
 
   let extraClass = "task-card";
   if (isDragging) extraClass += " dragging";
   if (dragOverPos === "top") extraClass += " drag-over-top";
   if (dragOverPos === "bottom") extraClass += " drag-over-bottom";
-  const isManual = sortBy === "manual";
 
   return (
     <div id={`task-${task.id}`} ref={cardRef} className={extraClass} draggable={isManual && !task.completed}
@@ -2609,53 +2610,47 @@ function TaskItem({ task, onToggle, onDelete, onUpdate, isSuggested, isDragging,
       onDragOver={(e) => { if (!isManual) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; const rect = cardRef.current.getBoundingClientRect(); onDragOver(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
       onDragLeave={() => onDragLeave(task.id)}
       onDrop={(e) => { e.preventDefault(); if (!isManual) return; const rect = cardRef.current.getBoundingClientRect(); onDrop(task.id, e.clientY < rect.top + rect.height / 2 ? "top" : "bottom"); }}
-      style={{ background: isOverdue ? "#fff5f5" : "white", borderLeft: `4px solid ${isOverdue ? "#ef4444" : pColors.badge}`, opacity: task.completed ? 0.5 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: 12 }}>
-      <div className="task-card-inner" style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+      style={{ background: isOverdue ? "#fff5f5" : "white", borderLeft: `4px solid ${isOverdue ? "#ef4444" : pColors.badge}`, opacity: task.completed ? 0.55 : undefined, boxShadow: isSuggested && !task.completed ? "0 0 0 2px #60a5fa, 0 0 0 5px rgba(96,165,250,0.2)" : "0 1px 3px rgba(0,0,0,0.06)", borderRadius: 10, padding: "8px 10px" }}>
+      {/* Row 1: checkbox + text */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
         {isManual && !task.completed && <span className="drag-handle" title="Drag to reorder">⠿</span>}
-        <button onClick={() => onToggle(task.id)} style={{ marginTop: 2, width: 20, height: 20, borderRadius: "50%", border: "2px solid", borderColor: task.completed ? "#9ca3af" : "#d1d5db", background: task.completed ? "#9ca3af" : "transparent", color: task.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>{task.completed && "✓"}</button>
+        <button onClick={() => onToggle(task.id)} style={{ marginTop: 2, width: 18, height: 18, borderRadius: "50%", border: "2px solid", borderColor: task.completed ? "#9ca3af" : "#d1d5db", background: task.completed ? "#9ca3af" : "transparent", color: task.completed ? "white" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, flexShrink: 0 }}>{task.completed && "✓"}</button>
         <div style={{ flex: 1, minWidth: 0 }}>
           {editing ? (
-            <input autoFocus style={{ width: "100%", background: "white", border: "1px solid #d1d5db", borderRadius: 4, padding: "4px 8px", fontSize: 13, outline: "none", boxSizing: "border-box" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
+            <input autoFocus style={{ width: "100%", background: "white", border: "1px solid #d1d5db", borderRadius: 4, padding: "3px 8px", fontSize: 13, outline: "none", boxSizing: "border-box" }} value={editText} onChange={e => setEditText(e.target.value)} onBlur={handleSave} onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setEditing(false); }} />
           ) : (
-            <p style={{ fontSize: 13, cursor: "pointer", textDecoration: task.completed ? "line-through" : "none", color: task.completed ? "#9ca3af" : "#1f2937", margin: 0, wordBreak: "break-word" }} onDoubleClick={() => { if (!task.completed) { setEditText(task.text); setEditing(true); } }}>
+            <p style={{ fontSize: 13, cursor: "pointer", textDecoration: task.completed ? "line-through" : "none", color: task.completed ? "#9ca3af" : "#1f2937", margin: 0, wordBreak: "break-word", lineHeight: 1.4 }} onDoubleClick={() => { if (!task.completed) { setEditText(task.text); setEditing(true); } }}>
               {isSuggested && !task.completed && <span style={{ color: "#3b82f6", fontWeight: 600, marginRight: 4 }}>★</span>}{task.text}
             </p>
           )}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-            <span style={{ background: pColors.badge, color: "white", fontSize: 10, padding: "1px 6px", borderRadius: 4 }}>{task.priority}</span>
-            <CategoryBadge category={task.category} />
-            {task.dueDate && (() => { const isOverdue = task.dueDate < todayStr() && !task.completed; return <span style={{ fontSize: 11, color: isOverdue ? "#dc2626" : "#6b7280", fontWeight: isOverdue ? 600 : 400 }}>Due: {new Date(task.dueDate + "T00:00:00").toLocaleDateString()}{isOverdue && " (overdue)"}</span>; })()}
-            {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", border: "1px solid #c4b5fd40", padding: "1px 5px", borderRadius: 8 }}>🔄 recurring</span>}
-            <span style={{ fontSize: 11, color: "#9ca3af" }}>{daysSince(task.createdAt)}d ago</span>
+          {/* Row 2: all controls in one compact line */}
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 5, flexWrap: "wrap" }}>
+            <button onClick={cyclePriority} title="Click to change priority" style={{ background: pColors.badge, color: "white", border: "none", fontSize: 10, padding: "2px 7px", borderRadius: 4, cursor: "pointer", fontWeight: 600, flexShrink: 0 }}>{task.priority}</button>
+            <select value={task.category} onChange={e => onUpdate(task.id, { category: e.target.value })} style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 5, padding: "2px 4px", flexShrink: 0, color: "#374151", maxWidth: 110 }}>
+              {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
+            </select>
+            <input type="date" value={task.dueDate || ""} onChange={e => onUpdate(task.id, { dueDate: e.target.value })} style={{ fontSize: 11, background: "white", border: `1px solid ${isOverdue ? "#fca5a5" : "#e5e7eb"}`, borderRadius: 5, padding: "2px 5px", color: isOverdue ? "#dc2626" : "#6b7280", flexShrink: 0 }} />
+            {task.recurringRuleId && <span style={{ fontSize: 10, background: "#f5f3ff", color: "#7c3aed", border: "1px solid #c4b5fd40", padding: "1px 5px", borderRadius: 8, flexShrink: 0 }}>🔄</span>}
+            <span style={{ fontSize: 10, color: "#d1d5db", marginLeft: "auto" }}>{daysSince(task.createdAt)}d</span>
+            {!task.completed && (
+              <button onClick={() => setShowNotes(prev => !prev)} title={task.notes ? "View note" : "Add note"} style={{ fontSize: 11, color: task.notes ? "#4338ca" : "#c4c4c4", background: task.notes ? "#e0e7ff" : "none", border: task.notes ? "1px solid #c7d2fe" : "none", padding: "1px 5px", borderRadius: 5, cursor: "pointer", flexShrink: 0 }}>📝</button>
+            )}
+            <button onClick={() => onDelete(task.id)} style={{ color: "#dc2626", border: "1px solid #fecaca", background: "#fef2f2", cursor: "pointer", padding: "2px 7px", borderRadius: 5, fontSize: 10, flexShrink: 0 }}>✕</button>
           </div>
-          {/* Action controls - stacked on mobile */}
-          <div className="task-card-actions" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-            <PriorityPicker value={task.priority} onChange={p => onUpdate(task.id, { priority: p })} size="small" />
-            <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} value={task.category} onChange={e => onUpdate(task.id, { category: e.target.value })}>{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}</select>
-            <input type="date" style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 6, padding: "4px 6px" }} value={task.dueDate || ""} onChange={e => onUpdate(task.id, { dueDate: e.target.value })} />
-            <button onClick={() => onDelete(task.id)} style={{ color: "#dc2626", border: "1px solid #fecaca", background: "#fef2f2", cursor: "pointer", padding: "3px 8px", borderRadius: 6, fontSize: 11 }}>Delete</button>
-          </div>
-          {/* Notes */}
-          {!task.completed && (
-            <div style={{ marginTop: 4 }}>
-              <button onClick={() => setShowNotes(prev => !prev)} style={{ fontSize: 10, color: task.notes ? "#4338ca" : "#9ca3af", background: task.notes ? "#e0e7ff" : "none", border: task.notes ? "1px solid #c7d2fe" : "none", padding: "2px 8px", borderRadius: 6, cursor: "pointer" }}>
-                {task.notes ? `📝 Note` : `+ Add note`}
-              </button>
-              {showNotes && (
-                <div style={{ marginTop: 6 }}>
-                  {editNotes ? (
-                    <div>
-                      <textarea value={notesText} onChange={e => setNotesText(e.target.value)} rows={3} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "6px 10px", fontSize: 12, outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Add notes, links, or context..." autoFocus />
-                      <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                        <button onClick={() => { onUpdate(task.id, { notes: notesText.trim() || undefined }); setEditNotes(false); }} style={{ background: "#3b82f6", color: "white", border: "none", padding: "4px 12px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Save</button>
-                        <button onClick={() => { setNotesText(task.notes || ""); setEditNotes(false); }} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div onClick={() => setEditNotes(true)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "8px 10px", fontSize: 12, color: task.notes ? "#374151" : "#9ca3af", cursor: "pointer", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
-                      {task.notes || "Click to add notes..."}
-                    </div>
-                  )}
+          {/* Notes area */}
+          {!task.completed && showNotes && (
+            <div style={{ marginTop: 6 }}>
+              {editNotes ? (
+                <div>
+                  <textarea value={notesText} onChange={e => setNotesText(e.target.value)} rows={3} style={{ width: "100%", border: "1px solid #d1d5db", borderRadius: 8, padding: "6px 10px", fontSize: 12, outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }} placeholder="Add notes, links, or context..." autoFocus />
+                  <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                    <button onClick={() => { onUpdate(task.id, { notes: notesText.trim() || undefined }); setEditNotes(false); }} style={{ background: "#3b82f6", color: "white", border: "none", padding: "4px 12px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Save</button>
+                    <button onClick={() => { setNotesText(task.notes || ""); setEditNotes(false); }} style={{ background: "white", color: "#6b7280", border: "1px solid #d1d5db", padding: "4px 10px", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div onClick={() => setEditNotes(true)} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "8px 10px", fontSize: 12, color: task.notes ? "#374151" : "#9ca3af", cursor: "pointer", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                  {task.notes || "Click to add notes..."}
                 </div>
               )}
             </div>
@@ -2694,6 +2689,9 @@ function TaskManager() {
   const [showTodaySection, setShowTodaySection] = useState(false);
   const [quoteExpanded, setQuoteExpanded] = useState(true);
   const [showInputExtras, setShowInputExtras] = useState(false);
+  const [sortTrigger, setSortTrigger] = useState(0);
+  const [stableOrder, setStableOrder] = useState(null);
+  const tasksRef = useRef(tasks);
   const inputRef = useRef(null);
 
   const cloudWriteRef = useRef(false); // prevent echo writes for tasks
@@ -2725,8 +2723,15 @@ function TaskManager() {
         const cutoffStr = localDateStr(cutoff);
         arr = arr.filter(t => !t.completed || !t.completedAt || t.completedAt > cutoffStr);
         cloudWriteRef.current = true;
-        setTasks(arr);
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e) {}
+        setTasks(prev => {
+          // Preserve locally-spawned recurring tasks not yet synced to cloud
+          const today = todayStr();
+          const cloudIds = new Set(arr.map(t => t.id));
+          const localSpawns = prev.filter(t => t.recurringRuleId && t.createdAt === today && !cloudIds.has(t.id));
+          const merged = localSpawns.length > 0 ? [...arr, ...localSpawns] : arr;
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch(e) {}
+          return merged;
+        });
       }
     });
     const unsub2 = listenToCloud("recurringRules", (data) => {
@@ -2750,6 +2755,8 @@ function TaskManager() {
     });
     return () => { unsub1(); unsub2(); unsub3(); unsub4(); };
   }, [user, listenToCloud]);
+
+  useEffect(() => { tasksRef.current = tasks; }, [tasks]);
 
   // Save to localStorage + cloud
   useEffect(() => {
@@ -2825,6 +2832,7 @@ function TaskManager() {
     else if (/^~\s*/.test(text)) { priority = "low"; cleanText = text.replace(/^~\s*/, ""); }
     if (!cleanText.trim()) return; // prevent empty tasks from shortcut prefixes
     setTasks(prev => [...prev, { id: generateId(), text: cleanText, priority, category: newCategory, dueDate: newDueDate, completed: false, createdAt: todayStr() }]);
+    setSortTrigger(prev => prev + 1);
     setInput("");
     setNewDueDate("");
   };
@@ -2895,22 +2903,43 @@ function TaskManager() {
   const skipSuggestion = () => { if (suggestionIndex < suggestionList.length - 1) setSuggestionIndex(prev => prev + 1); };
   const dismissSuggestions = () => { setSuggestionList([]); setSuggestionIndex(0); };
 
-  const getSortedTasks = () => {
-    let filtered = [...tasks];
-    if (filterCategory !== "all") filtered = filtered.filter(t => t.category === filterCategory);
-    if (filterPriority !== "all") filtered = filtered.filter(t => t.priority === filterPriority);
-    filtered = filtered.filter(t => !t.completed);
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(t => t.text.toLowerCase().includes(q) || (t.notes || "").toLowerCase().includes(q));
-    }
+  // Recompute stable sort order on explicit triggers only (not on task updates)
+  useEffect(() => {
+    const t = tasksRef.current;
+    let filtered = t.filter(x => !x.completed);
+    if (filterCategory !== "all") filtered = filtered.filter(x => x.category === filterCategory);
+    if (filterPriority !== "all") filtered = filtered.filter(x => x.priority === filterPriority);
+    if (searchQuery.trim()) { const q = searchQuery.toLowerCase(); filtered = filtered.filter(x => x.text.toLowerCase().includes(q) || (x.notes || "").toLowerCase().includes(q)); }
     if (sortBy === "priority") filtered.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
     else if (sortBy === "dueDate") filtered.sort((a, b) => { if (!a.dueDate && !b.dueDate) return 0; if (!a.dueDate) return 1; if (!b.dueDate) return -1; return new Date(a.dueDate) - new Date(b.dueDate); });
     else if (sortBy === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     else if (sortBy === "oldest") filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     else if (sortBy === "smart") filtered.sort((a, b) => scoreTask(b) - scoreTask(a));
     else if (sortBy === "category") filtered.sort((a, b) => a.category.localeCompare(b.category));
-    return filtered;
+    setStableOrder(filtered.map(x => x.id));
+  }, [sortBy, filterCategory, filterPriority, searchQuery, sortTrigger]); // NOT tasks — prevents re-sort on task edits
+
+  const getSortedTasks = () => {
+    let filtered = tasks.filter(t => !t.completed);
+    if (filterCategory !== "all") filtered = filtered.filter(t => t.category === filterCategory);
+    if (filterPriority !== "all") filtered = filtered.filter(t => t.priority === filterPriority);
+    if (searchQuery.trim()) { const q = searchQuery.toLowerCase(); filtered = filtered.filter(t => t.text.toLowerCase().includes(q) || (t.notes || "").toLowerCase().includes(q)); }
+    if (!stableOrder) {
+      // Fallback before first sort computation
+      if (sortBy === "priority") filtered.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
+      else if (sortBy === "dueDate") filtered.sort((a, b) => { if (!a.dueDate && !b.dueDate) return 0; if (!a.dueDate) return 1; if (!b.dueDate) return -1; return new Date(a.dueDate) - new Date(b.dueDate); });
+      else if (sortBy === "newest") filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      else if (sortBy === "oldest") filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      else if (sortBy === "smart") filtered.sort((a, b) => scoreTask(b) - scoreTask(a));
+      else if (sortBy === "category") filtered.sort((a, b) => a.category.localeCompare(b.category));
+      return filtered;
+    }
+    const orderMap = new Map(stableOrder.map((id, i) => [id, i]));
+    return filtered.sort((a, b) => {
+      const ai = orderMap.has(a.id) ? orderMap.get(a.id) : 99999;
+      const bi = orderMap.has(b.id) ? orderMap.get(b.id) : 99999;
+      return ai - bi;
+    });
   };
 
   const pendingCount = tasks.filter(t => !t.completed).length;
@@ -2973,7 +3002,7 @@ function TaskManager() {
         {/* Tab switcher */}
         <div style={{ display: "flex", gap: 0, marginBottom: 8, background: "#f1f5f9", borderRadius: 10, padding: 3 }}>
           {[{ key: "tasks", icon: "📝", label: "Tasks" }, { key: "goals", icon: "🎯", label: "Goals" }, { key: "dashboard", icon: "📊", label: "Dashboard" }].map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s", background: activeTab === tab.key ? "white" : "transparent", color: activeTab === tab.key ? "#1f2937" : "#6b7280", boxShadow: activeTab === tab.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>{tab.icon} {tab.label}</button>
+            <button key={tab.key} onClick={() => { setActiveTab(tab.key); setSortTrigger(prev => prev + 1); }} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s", background: activeTab === tab.key ? "white" : "transparent", color: activeTab === tab.key ? "#1f2937" : "#6b7280", boxShadow: activeTab === tab.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>{tab.icon} {tab.label}</button>
           ))}
         </div>
 
@@ -3126,7 +3155,7 @@ function TaskManager() {
                   <button onClick={clearCompleted} style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer" }}>🗑 Remove All Completed</button>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {tasks.filter(t => t.completed).map(task => {
+                  {tasks.filter(t => t.completed).sort((a, b) => { const ad = a.completedAt || ""; const bd = b.completedAt || ""; return bd.localeCompare(ad); }).map(task => {
                     const pColors = PRIORITY_COLORS[task.priority];
                     const cat = CATEGORIES.find(c => c.value === task.category) || CATEGORIES[CATEGORIES.length - 1];
                     return (
