@@ -2548,6 +2548,89 @@ function Dashboard({ tasks, goals, recurringRules }) {
         );
       })()}
 
+      {/* Closure Ratio Report */}
+      <div style={{ ...cardStyle, marginBottom: 20 }}>
+        <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>📈 Task Closure Ratio</p>
+        <p style={{ margin: "0 0 14px", fontSize: 11, color: "#9ca3af" }}>Completed ÷ Created per day — green &gt;1, yellow =1, red &lt;1</p>
+
+        {/* Today highlight */}
+        {(() => {
+          const todayData = last7Days.find(d => d.date === today);
+          const ratio = todayData && todayData.created > 0 ? todayData.completed / todayData.created : null;
+          const isGreen = ratio !== null && ratio > 1;
+          const isYellow = ratio !== null && ratio === 1;
+          const isRed = ratio !== null && ratio < 1;
+          const color = isGreen ? "#16a34a" : isYellow ? "#d97706" : isRed ? "#dc2626" : "#9ca3af";
+          const bg = isGreen ? "#f0fdf4" : isYellow ? "#fffbeb" : isRed ? "#fef2f2" : "#f9fafb";
+          const border = isGreen ? "#bbf7d0" : isYellow ? "#fde68a" : isRed ? "#fecaca" : "#e5e7eb";
+          const label = isGreen ? "🚀 Ahead of backlog" : isYellow ? "✅ On track" : isRed ? "⚠️ Backlog growing" : "No data yet";
+          return (
+            <div style={{ background: bg, border: `2px solid ${border}`, borderRadius: 12, padding: "12px 16px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1f2937" }}>Today</p>
+                <p style={{ margin: "3px 0 0", fontSize: 11, color: "#6b7280" }}>{todayData ? `${todayData.completed} closed · ${todayData.created} created` : "No tasks yet"}</p>
+                <p style={{ margin: "3px 0 0", fontSize: 11, fontWeight: 600, color }}>{label}</p>
+              </div>
+              <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color, lineHeight: 1 }}>{ratio !== null ? ratio.toFixed(2) : "—"}</p>
+            </div>
+          );
+        })()}
+
+        {/* 7-day breakdown */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {last7Days.map(d => {
+            const ratio = d.created > 0 ? d.completed / d.created : null;
+            const isGreen = ratio !== null && ratio > 1;
+            const isYellow = ratio !== null && ratio === 1;
+            const isRed = ratio !== null && ratio < 1;
+            const dotColor = isGreen ? "#16a34a" : isYellow ? "#d97706" : isRed ? "#dc2626" : "#d1d5db";
+            const barPct = d.created > 0 ? Math.min((d.completed / d.created) * 100, 100) : 0;
+            const rowBg = d.date === today ? (isGreen ? "#f0fdf4" : isYellow ? "#fffbeb" : isRed ? "#fef2f2" : "#f3f4f6") : "transparent";
+            return (
+              <div key={d.date} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, background: rowBg }}>
+                <span style={{ fontSize: 11, fontWeight: d.date === today ? 700 : 500, color: d.date === today ? "#1f2937" : "#6b7280", width: 38, flexShrink: 0 }}>{d.day}{d.date === today ? " ★" : ""}</span>
+                <div style={{ flex: 1, height: 7, background: "#f3f4f6", borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${barPct}%`, background: dotColor, borderRadius: 4, transition: "width 0.4s ease" }} />
+                </div>
+                <span style={{ fontSize: 10, color: "#9ca3af", width: 60, textAlign: "right", flexShrink: 0 }}>{d.completed}✓ / {d.created}+</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: dotColor, width: 36, textAlign: "right", flexShrink: 0 }}>{ratio !== null ? ratio.toFixed(2) : "—"}</span>
+                <span style={{ width: 9, height: 9, borderRadius: "50%", background: dotColor, flexShrink: 0, display: "inline-block" }} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Weekly average */}
+        {(() => {
+          const activeDays = last7Days.filter(d => d.created > 0);
+          if (activeDays.length === 0) return null;
+          const avgRatio = activeDays.reduce((sum, d) => sum + d.completed / d.created, 0) / activeDays.length;
+          const isGreen = avgRatio > 1;
+          const isYellow = avgRatio === 1;
+          const color = isGreen ? "#16a34a" : isYellow ? "#d97706" : "#dc2626";
+          const bg = isGreen ? "#f0fdf4" : isYellow ? "#fffbeb" : "#fef2f2";
+          const border = isGreen ? "#bbf7d0" : isYellow ? "#fde68a" : "#fecaca";
+          const totalCompleted = last7Days.reduce((s, d) => s + d.completed, 0);
+          const totalCreated = last7Days.reduce((s, d) => s + d.created, 0);
+          return (
+            <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: "10px 14px", marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#1f2937" }}>7-Day Average</p>
+                <p style={{ margin: "2px 0 0", fontSize: 10, color: "#6b7280" }}>{totalCompleted} closed · {totalCreated} created · {activeDays.length} active days</p>
+              </div>
+              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color, lineHeight: 1 }}>{avgRatio.toFixed(2)}</p>
+            </div>
+          );
+        })()}
+
+        {/* Legend */}
+        <div style={{ display: "flex", gap: 14, marginTop: 12, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 10, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} /> &gt;1 Ahead of backlog</span>
+          <span style={{ fontSize: 10, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#d97706", display: "inline-block" }} /> =1 On track</span>
+          <span style={{ fontSize: 10, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#dc2626", display: "inline-block" }} /> &lt;1 Backlog growing</span>
+        </div>
+      </div>
+
       {/* Empty state */}
       {tasks.length === 0 && allGoals.length === 0 && (
         <div style={{ ...cardStyle, textAlign: "center", padding: "40px 20px", marginBottom: 20 }}>
