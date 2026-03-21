@@ -3197,12 +3197,16 @@ function TaskManager() {
                     </div>
                   ))}
                   {dueTodayTasks.length > 0 && <p style={{ fontSize: 10, color: "#b45309", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>📅 Due today</p>}
-                  {dueTodayTasks.map(task => (
-                    <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #fbbf24, 0 0 12px rgba(251,191,36,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: "1px solid #fde68a", borderLeft: "3px solid #f59e0b", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
-                      <CategoryBadge category={task.category} />
-                    </div>
-                  ))}
+                  {dueTodayTasks.map(task => {
+                    const pc = task.priority === "high" ? { border: "#fca5a5", left: "#ef4444", glow: "#ef4444", glowA: "rgba(239,68,68,0.4)" } : task.priority === "medium" ? { border: "#fde68a", left: "#f59e0b", glow: "#fbbf24", glowA: "rgba(251,191,36,0.4)" } : { border: "#bbf7d0", left: "#22c55e", glow: "#4ade80", glowA: "rgba(74,222,128,0.4)" };
+                    return (
+                      <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = `0 0 0 3px ${pc.glow}, 0 0 12px ${pc.glowA}`; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: `1px solid ${pc.border}`, borderLeft: `3px solid ${pc.left}`, borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
+                        <span style={{ fontSize: 10, background: pc.left, color: "white", padding: "1px 6px", borderRadius: 4, fontWeight: 600, flexShrink: 0 }}>{task.priority}</span>
+                        <CategoryBadge category={task.category} />
+                      </div>
+                    );
+                  })}
                   {recurringToday.length > 0 && <p style={{ fontSize: 10, color: "#7c3aed", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>🔄 Recurring today</p>}
                   {recurringToday.map(task => (
                     <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #a78bfa, 0 0 12px rgba(167,139,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: "1px solid #e9d5ff", borderLeft: "3px solid #7c3aed", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
