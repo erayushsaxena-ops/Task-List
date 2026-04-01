@@ -2295,6 +2295,24 @@ function Dashboard({ tasks, goals, recurringRules }) {
     goalsByLevel[lv.key] = { total: lvGoals.length, completed: lvGoals.filter(g => g.completed).length };
   });
 
+  // ── 7-day closure ratio ──
+  const weekTotalCompleted = last7Days.reduce((s, d) => s + d.completed, 0);
+  const weekTotalCreated   = last7Days.reduce((s, d) => s + d.created, 0);
+  const weekClosureRatio   = weekTotalCreated > 0 ? weekTotalCompleted / weekTotalCreated : null;
+
+  // ── 7-day recurring consistency ──
+  const enabledRulesForTile = (recurringRules || []).filter(r => r.enabled);
+  let tileRecurScheduled = 0, tileRecurCompleted = 0;
+  enabledRulesForTile.forEach(rule => {
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const dw = d.getDay(), dm = d.getDate(), ds = localDateStr(d);
+      let runs = rule.type === "daily" || (rule.type === "weekdays" && dw >= 1 && dw <= 5) || (rule.type === "weekly" && (rule.days || []).includes(dw)) || (rule.type === "monthly" && (rule.monthDays || []).includes(dm));
+      if (runs) { tileRecurScheduled++; if (tasks.find(t => t.recurringRuleId === rule.id && t.createdAt === ds && t.completed)) tileRecurCompleted++; }
+    }
+  });
+  const weekRecurPct = tileRecurScheduled > 0 ? Math.round((tileRecurCompleted / tileRecurScheduled) * 100) : null;
+
   const cardStyle = { background: "white", borderRadius: 12, border: "1px solid #e5e7eb", padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" };
   const statNum = { fontSize: 28, fontWeight: 700, margin: 0, lineHeight: 1 };
   const statLabel = { fontSize: 11, color: "#6b7280", margin: "4px 0 0" };
@@ -2319,6 +2337,16 @@ function Dashboard({ tasks, goals, recurringRules }) {
           <p style={{ ...statNum, color: "#7c3aed" }}>{streak}</p>
           <p style={statLabel}>Day Streak 🔥</p>
         </div>
+        <div style={{ ...cardStyle, borderLeft: `4px solid ${weekClosureRatio === null ? "#d1d5db" : weekClosureRatio > 1 ? "#16a34a" : weekClosureRatio === 1 ? "#d97706" : "#dc2626"}` }}>
+          <p style={{ ...statNum, color: weekClosureRatio === null ? "#9ca3af" : weekClosureRatio > 1 ? "#16a34a" : weekClosureRatio === 1 ? "#d97706" : "#dc2626" }}>{weekClosureRatio !== null ? weekClosureRatio.toFixed(2) : "—"}</p>
+          <p style={statLabel}>7d Closure Ratio</p>
+        </div>
+        {weekRecurPct !== null && (
+          <div style={{ ...cardStyle, borderLeft: `4px solid ${weekRecurPct >= 80 ? "#22c55e" : weekRecurPct >= 50 ? "#f59e0b" : "#ef4444"}` }}>
+            <p style={{ ...statNum, color: weekRecurPct >= 80 ? "#22c55e" : weekRecurPct >= 50 ? "#f59e0b" : "#ef4444" }}>{weekRecurPct}%</p>
+            <p style={statLabel}>7d Recurring ✓</p>
+          </div>
+        )}
       </div>
 
       {/* 7-Day Activity Chart */}
@@ -2341,107 +2369,6 @@ function Dashboard({ tasks, goals, recurringRules }) {
           <span style={{ fontSize: 10, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, background: "#22c55e", borderRadius: 2, display: "inline-block" }}></span> Completed</span>
         </div>
       </div>
-
-      {/* Category & Priority Breakdown */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 12, marginBottom: 20 }}>
-        {/* By Category */}
-        <div style={cardStyle}>
-          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>📁 By Category</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {catStats.map(cat => {
-              const pct = cat.total > 0 ? Math.round((cat.done / cat.total) * 100) : 0;
-              return (
-                <div key={cat.value}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, color: cat.color, fontWeight: 500 }}>{cat.icon} {cat.label}</span>
-                    <span style={{ fontSize: 11, color: "#6b7280" }}>{cat.done}/{cat.total} ({pct}%)</span>
-                  </div>
-                  <div style={{ width: "100%", height: 6, background: "#f3f4f6", borderRadius: 3 }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: cat.color, borderRadius: 3, transition: "width 0.3s" }}></div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* By Priority */}
-        <div style={cardStyle}>
-          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>⚡ By Priority</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {priStats.map(p => (
-              <div key={p.value} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 18 }}>{p.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: "#374151" }}>{p.label}</span>
-                    <span style={{ fontSize: 11, color: "#6b7280" }}>{p.pending} pending</span>
-                  </div>
-                  <div style={{ width: "100%", height: 6, background: "#f3f4f6", borderRadius: 3 }}>
-                    <div style={{ width: `${p.total > 0 ? Math.round(((p.total - p.pending) / p.total) * 100) : 0}%`, height: "100%", background: p.color, borderRadius: 3, transition: "width 0.3s" }}></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Goal Progress by Level */}
-      <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>🎯 Goal Progress by Timeframe</p>
-        {GOAL_LEVELS.map(lv => {
-          const stats = goalsByLevel[lv.key];
-          if (stats.total === 0) return null;
-          const pct = Math.round((stats.completed / stats.total) * 100);
-          return (
-            <div key={lv.key} style={{ marginBottom: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                <span style={{ fontSize: 12, color: lv.color, fontWeight: 600 }}>{lv.icon} {lv.label}</span>
-                <span style={{ fontSize: 11, color: "#6b7280" }}>{stats.completed}/{stats.total} ({pct}%)</span>
-              </div>
-              <div style={{ width: "100%", height: 8, background: "#f3f4f6", borderRadius: 4 }}>
-                <div style={{ width: `${pct}%`, height: "100%", background: lv.color, borderRadius: 4, transition: "width 0.3s" }}></div>
-              </div>
-            </div>
-          );
-        })}
-        {allGoals.length === 0 && <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", padding: 12 }}>No goals yet. Add some in the Goals tab!</p>}
-      </div>
-
-      {/* Target Tracker */}
-      {goalsWithTargets.length > 0 && (
-        <div style={{ ...cardStyle, marginBottom: 20 }}>
-          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>📈 Target Tracker</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {goalsWithTargets.map(g => {
-              const lv = GOAL_LEVELS.find(l => l.key === g.level) || GOAL_LEVELS[0];
-              const { pct, isComplete } = calcTargetProgress(g);
-              const isDecrease = g.targetDirection === "decrease";
-              return (
-                <div key={g.id} style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 10, padding: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#1f2937" }}>{g.targetLabel} {isDecrease ? <span style={{ fontSize: 10, color: "#dc2626" }}>▼ reduce</span> : <span style={{ fontSize: 10, color: "#059669" }}>▲ increase</span>}</span>
-                    <span style={{ fontSize: 10, background: lv.bg, color: lv.color, padding: "2px 8px", borderRadius: 8, fontWeight: 600 }}>{lv.icon} {lv.short}</span>
-                  </div>
-                  <p style={{ fontSize: 11, color: "#6b7280", margin: "2px 0 8px" }}>{g.text}</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ flex: 1, height: 10, background: "#fef3c7", borderRadius: 5 }}>
-                      <div style={{ width: `${pct}%`, height: "100%", background: isComplete ? "#22c55e" : "#d97706", borderRadius: 5, transition: "width 0.3s" }}></div>
-                    </div>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: isComplete ? "#22c55e" : "#d97706", minWidth: 40, textAlign: "right" }}>{pct}%</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", marginTop: 4, gap: 4 }}>
-                    {isDecrease && g.startValue ? <span style={{ fontSize: 11, color: "#92400e" }}>Start: <strong>{g.startValue}</strong> {g.targetUnit}</span> : null}
-                    <span style={{ fontSize: 11, color: "#92400e" }}>Current: <strong>{g.currentValue || 0}</strong> {g.targetUnit}</span>
-                    <span style={{ fontSize: 11, color: "#92400e" }}>Target: <strong>{g.targetValue}</strong> {g.targetUnit}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Recurring Task Consistency */}
       {(recurringRules || []).filter(r => r.enabled).length > 0 && (() => {
@@ -2602,23 +2529,22 @@ function Dashboard({ tasks, goals, recurringRules }) {
 
         {/* Weekly average */}
         {(() => {
-          const activeDays = last7Days.filter(d => d.created > 0);
-          if (activeDays.length === 0) return null;
-          const avgRatio = activeDays.reduce((sum, d) => sum + d.completed / d.created, 0) / activeDays.length;
-          const isGreen = avgRatio > 1;
-          const isYellow = avgRatio === 1;
+          const totalCompleted = last7Days.reduce((s, d) => s + d.completed, 0);
+          const totalCreated = last7Days.reduce((s, d) => s + d.created, 0);
+          if (totalCreated === 0) return null;
+          const weekRatio = totalCompleted / totalCreated;
+          const isGreen = weekRatio > 1;
+          const isYellow = weekRatio === 1;
           const color = isGreen ? "#16a34a" : isYellow ? "#d97706" : "#dc2626";
           const bg = isGreen ? "#f0fdf4" : isYellow ? "#fffbeb" : "#fef2f2";
           const border = isGreen ? "#bbf7d0" : isYellow ? "#fde68a" : "#fecaca";
-          const totalCompleted = last7Days.reduce((s, d) => s + d.completed, 0);
-          const totalCreated = last7Days.reduce((s, d) => s + d.created, 0);
           return (
             <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: "10px 14px", marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#1f2937" }}>7-Day Average</p>
-                <p style={{ margin: "2px 0 0", fontSize: 10, color: "#6b7280" }}>{totalCompleted} closed · {totalCreated} created · {activeDays.length} active days</p>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#1f2937" }}>7-Day Total Ratio</p>
+                <p style={{ margin: "2px 0 0", fontSize: 10, color: "#6b7280" }}>{totalCompleted} closed ÷ {totalCreated} created</p>
               </div>
-              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color, lineHeight: 1 }}>{avgRatio.toFixed(2)}</p>
+              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color, lineHeight: 1 }}>{weekRatio.toFixed(2)}</p>
             </div>
           );
         })()}
@@ -2630,6 +2556,107 @@ function Dashboard({ tasks, goals, recurringRules }) {
           <span style={{ fontSize: 10, color: "#6b7280", display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#dc2626", display: "inline-block" }} /> &lt;1 Backlog growing</span>
         </div>
       </div>
+
+      {/* Category & Priority Breakdown */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 12, marginBottom: 20 }}>
+        {/* By Category */}
+        <div style={cardStyle}>
+          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>📁 By Category</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {catStats.map(cat => {
+              const pct = cat.total > 0 ? Math.round((cat.done / cat.total) * 100) : 0;
+              return (
+                <div key={cat.value}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                    <span style={{ fontSize: 12, color: cat.color, fontWeight: 500 }}>{cat.icon} {cat.label}</span>
+                    <span style={{ fontSize: 11, color: "#6b7280" }}>{cat.done}/{cat.total} ({pct}%)</span>
+                  </div>
+                  <div style={{ width: "100%", height: 6, background: "#f3f4f6", borderRadius: 3 }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: cat.color, borderRadius: 3, transition: "width 0.3s" }}></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* By Priority */}
+        <div style={cardStyle}>
+          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>⚡ By Priority</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {priStats.map(p => (
+              <div key={p.value} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 18 }}>{p.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: "#374151" }}>{p.label}</span>
+                    <span style={{ fontSize: 11, color: "#6b7280" }}>{p.pending} pending</span>
+                  </div>
+                  <div style={{ width: "100%", height: 6, background: "#f3f4f6", borderRadius: 3 }}>
+                    <div style={{ width: `${p.total > 0 ? Math.round(((p.total - p.pending) / p.total) * 100) : 0}%`, height: "100%", background: p.color, borderRadius: 3, transition: "width 0.3s" }}></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Goal Progress by Level */}
+      <div style={{ ...cardStyle, marginBottom: 20 }}>
+        <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>🎯 Goal Progress by Timeframe</p>
+        {GOAL_LEVELS.map(lv => {
+          const stats = goalsByLevel[lv.key];
+          if (stats.total === 0) return null;
+          const pct = Math.round((stats.completed / stats.total) * 100);
+          return (
+            <div key={lv.key} style={{ marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 12, color: lv.color, fontWeight: 600 }}>{lv.icon} {lv.label}</span>
+                <span style={{ fontSize: 11, color: "#6b7280" }}>{stats.completed}/{stats.total} ({pct}%)</span>
+              </div>
+              <div style={{ width: "100%", height: 8, background: "#f3f4f6", borderRadius: 4 }}>
+                <div style={{ width: `${pct}%`, height: "100%", background: lv.color, borderRadius: 4, transition: "width 0.3s" }}></div>
+              </div>
+            </div>
+          );
+        })}
+        {allGoals.length === 0 && <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", padding: 12 }}>No goals yet. Add some in the Goals tab!</p>}
+      </div>
+
+      {/* Target Tracker */}
+      {goalsWithTargets.length > 0 && (
+        <div style={{ ...cardStyle, marginBottom: 20 }}>
+          <p style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 600, color: "#1f2937" }}>📈 Target Tracker</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {goalsWithTargets.map(g => {
+              const lv = GOAL_LEVELS.find(l => l.key === g.level) || GOAL_LEVELS[0];
+              const { pct, isComplete } = calcTargetProgress(g);
+              const isDecrease = g.targetDirection === "decrease";
+              return (
+                <div key={g.id} style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 10, padding: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#1f2937" }}>{g.targetLabel} {isDecrease ? <span style={{ fontSize: 10, color: "#dc2626" }}>▼ reduce</span> : <span style={{ fontSize: 10, color: "#059669" }}>▲ increase</span>}</span>
+                    <span style={{ fontSize: 10, background: lv.bg, color: lv.color, padding: "2px 8px", borderRadius: 8, fontWeight: 600 }}>{lv.icon} {lv.short}</span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "#6b7280", margin: "2px 0 8px" }}>{g.text}</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ flex: 1, height: 10, background: "#fef3c7", borderRadius: 5 }}>
+                      <div style={{ width: `${pct}%`, height: "100%", background: isComplete ? "#22c55e" : "#d97706", borderRadius: 5, transition: "width 0.3s" }}></div>
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: isComplete ? "#22c55e" : "#d97706", minWidth: 40, textAlign: "right" }}>{pct}%</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", marginTop: 4, gap: 4 }}>
+                    {isDecrease && g.startValue ? <span style={{ fontSize: 11, color: "#92400e" }}>Start: <strong>{g.startValue}</strong> {g.targetUnit}</span> : null}
+                    <span style={{ fontSize: 11, color: "#92400e" }}>Current: <strong>{g.currentValue || 0}</strong> {g.targetUnit}</span>
+                    <span style={{ fontSize: 11, color: "#92400e" }}>Target: <strong>{g.targetValue}</strong> {g.targetUnit}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Empty state */}
       {tasks.length === 0 && allGoals.length === 0 && (
@@ -3191,6 +3218,7 @@ function TaskManager() {
                   {overdueTasks.length > 0 && <p style={{ fontSize: 10, color: "#b91c1c", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>🚨 Overdue</p>}
                   {overdueTasks.map(task => (
                     <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #ef4444, 0 0 12px rgba(239,68,68,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "#fff5f5", border: "1px solid #fecaca", borderLeft: "3px solid #ef4444", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                      <button onClick={e => { e.stopPropagation(); toggleTask(task.id); }} title="Mark complete" style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #ef4444", background: "transparent", color: "#ef4444", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>✓</button>
                       <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
                       <span style={{ fontSize: 10, color: "#dc2626", fontWeight: 600 }}>{(() => { const days = Math.floor((new Date(todayDate + "T00:00:00") - new Date(task.dueDate + "T00:00:00")) / 86400000); return days === 1 ? "1d late" : `${days}d late`; })()}</span>
                       <CategoryBadge category={task.category} />
@@ -3201,6 +3229,7 @@ function TaskManager() {
                     const pc = task.priority === "high" ? { border: "#fca5a5", left: "#ef4444", glow: "#ef4444", glowA: "rgba(239,68,68,0.4)" } : task.priority === "medium" ? { border: "#fde68a", left: "#f59e0b", glow: "#fbbf24", glowA: "rgba(251,191,36,0.4)" } : { border: "#bbf7d0", left: "#22c55e", glow: "#4ade80", glowA: "rgba(74,222,128,0.4)" };
                     return (
                       <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = `0 0 0 3px ${pc.glow}, 0 0 12px ${pc.glowA}`; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: `1px solid ${pc.border}`, borderLeft: `3px solid ${pc.left}`, borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                        <button onClick={e => { e.stopPropagation(); toggleTask(task.id); }} title="Mark complete" style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${pc.left}`, background: "transparent", color: pc.left, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>✓</button>
                         <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
                         <span style={{ fontSize: 10, background: pc.left, color: "white", padding: "1px 6px", borderRadius: 4, fontWeight: 600, flexShrink: 0 }}>{task.priority}</span>
                         <CategoryBadge category={task.category} />
@@ -3210,6 +3239,7 @@ function TaskManager() {
                   {recurringToday.length > 0 && <p style={{ fontSize: 10, color: "#7c3aed", fontWeight: 600, margin: "4px 0 2px", paddingLeft: 4 }}>🔄 Recurring today</p>}
                   {recurringToday.map(task => (
                     <div key={task.id} onClick={() => { const el = document.getElementById(`task-${task.id}`); if (el) { const y = el.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 3); window.scrollTo({ top: y, behavior: "smooth" }); setTimeout(() => { el.style.transition = "box-shadow 0.3s"; el.style.boxShadow = "0 0 0 3px #a78bfa, 0 0 12px rgba(167,139,250,0.4)"; setTimeout(() => { el.style.boxShadow = ""; }, 2000); }, 400); }}} style={{ background: "white", border: "1px solid #e9d5ff", borderLeft: "3px solid #7c3aed", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                      <button onClick={e => { e.stopPropagation(); toggleTask(task.id); }} title="Mark complete" style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #7c3aed", background: "transparent", color: "#7c3aed", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, flexShrink: 0 }}>✓</button>
                       <span style={{ fontSize: 12, color: "#1f2937", flex: 1 }}>{task.text}</span>
                       <CategoryBadge category={task.category} />
                     </div>
