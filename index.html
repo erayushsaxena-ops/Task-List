@@ -2329,10 +2329,17 @@ function Dashboard({ tasks, goals, recurringRules }) {
           <p style={{ ...statNum, color: "#f59e0b" }}>{pendingTasks.length}</p>
           <p style={statLabel}>Pending Tasks</p>
         </div>
-        <div style={{ ...cardStyle, borderLeft: "4px solid #22c55e" }}>
-          <p style={{ ...statNum, color: "#22c55e" }}>{completedTasks.length}</p>
-          <p style={statLabel}>Total Completed</p>
-        </div>
+        {(() => {
+          const td = last7Days.find(d => d.date === today);
+          const r = td && td.created > 0 ? td.completed / td.created : null;
+          const col = r === null ? "#9ca3af" : r > 1 ? "#16a34a" : r === 1 ? "#d97706" : "#dc2626";
+          return (
+            <div style={{ ...cardStyle, borderLeft: `4px solid ${col}` }}>
+              <p style={{ ...statNum, color: col }}>{r !== null ? r.toFixed(2) : "—"}</p>
+              <p style={statLabel}>Today's Ratio</p>
+            </div>
+          );
+        })()}
         <div style={{ ...cardStyle, borderLeft: "4px solid #7c3aed" }}>
           <p style={{ ...statNum, color: "#7c3aed" }}>{streak}</p>
           <p style={statLabel}>Day Streak 🔥</p>
