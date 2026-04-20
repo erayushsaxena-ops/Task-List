@@ -1406,12 +1406,7 @@ function loadTasks() {
       });
     }
   } catch (e) {}
-  return [
-    { id: generateId(), text: "Review quarterly report", priority: "high", category: "work", dueDate: "2026-03-18", completed: false, createdAt: "2026-03-14" },
-    { id: generateId(), text: "Prepare team sync agenda", priority: "medium", category: "work", dueDate: "2026-03-17", completed: false, createdAt: "2026-03-15" },
-    { id: generateId(), text: "Buy groceries", priority: "medium", category: "home", dueDate: "", completed: false, createdAt: "2026-03-15" },
-    { id: generateId(), text: "Schedule dentist appointment", priority: "low", category: "personal", dueDate: "", completed: false, createdAt: "2026-03-10" },
-  ];
+  return [];
 }
 
 // ── Firebase data layer ──
@@ -2952,6 +2947,8 @@ function TaskManager() {
     setSortTrigger(prev => prev + 1);
     setInput("");
     setNewDueDate("");
+    setNewPriority("medium");
+    setNewCategory("work");
   };
 
   const toggleTask = (id) => {
@@ -3176,7 +3173,7 @@ function TaskManager() {
           <select style={{ fontSize: 11, background: "white", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 6px", flexShrink: 0 }} value={filterPriority} onChange={e => setFilterPriority(e.target.value)} title="Filter priority">
             <option value="all">🎯 All</option><option value="high">🔴 High</option><option value="medium">🟡 Med</option><option value="low">🟢 Low</option>
           </select>
-          <button onClick={() => setShowRecurring(true)} style={{ background: "#faf5ff", color: "#7c3aed", border: "1px solid #c4b5fd", padding: "6px 10px", borderRadius: 8, fontSize: 11, fontWeight: 500, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>🔄</button>
+          <button onClick={() => setShowRecurring(true)} title="Schedule Recurring Tasks" style={{ background: "#7c3aed", color: "white", border: "none", padding: "6px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>🔄 Recurring</button>
           <button onClick={suggestNext} style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", padding: "6px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>★ Suggest</button>
         </div>
 
@@ -3209,9 +3206,9 @@ function TaskManager() {
 
         {/* Today's Focus Section */}
         {(() => {
-          const overdueTasks = sorted.filter(t => !t.completed && t.dueDate && t.dueDate < todayDate && !t.recurringRuleId);
+          const overdueTasks = sorted.filter(t => !t.completed && t.dueDate && t.dueDate < todayDate);
           const dueTodayTasks = sorted.filter(t => !t.completed && t.dueDate === todayDate && !t.recurringRuleId);
-          const recurringToday = sorted.filter(t => !t.completed && t.recurringRuleId);
+          const recurringToday = sorted.filter(t => !t.completed && t.recurringRuleId && !(t.dueDate && t.dueDate < todayDate));
           const todayTasks = [...overdueTasks, ...dueTodayTasks, ...recurringToday];
           if (todayTasks.length === 0) return null;
           return (
